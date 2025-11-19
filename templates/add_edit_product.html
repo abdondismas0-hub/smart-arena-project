@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if product %}Hariri Bidhaa{% else %}Ongeza Bidhaa Mpya{% endif %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
+            <header class="mb-6 border-b pb-4">
+                <h1 class="text-3xl font-extrabold text-gray-900">
+                    {% if product %}
+                        <i class="fas fa-edit text-blue-600 mr-2"></i> Hariri Bidhaa: {{ product.name }}
+                    {% else %}
+                        <i class="fas fa-plus-circle text-blue-600 mr-2"></i> Ongeza Bidhaa Mpya
+                    {% endif %}
+                </h1>
+            </header>
+            
+            <form method="POST" action="{% if product %}{{ url_for('edit_product', product_id=product.id) }}{% else %}{{ url_for('add_product') }}{% endif %}" class="space-y-6">
+                
+                <!-- Jina la Bidhaa -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Jina la Bidhaa</label>
+                    <input type="text" id="name" name="name" value="{{ product.name if product else '' }}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                </div>
+
+                <!-- Bei -->
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Bei (Tsh)</label>
+                    <input type="number" id="price" name="price" value="{{ product.price if product else '' }}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                </div>
+
+                <!-- Kategoria -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategoria</label>
+                    <select id="category" name="category" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if product and product.category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- URL ya Picha -->
+                <div>
+                    <label for="image_url" class="block text-sm font-medium text-gray-700 mb-1">URL ya Picha (Optional)</label>
+                    <input type="url" id="image_url" name="image_url" value="{{ product.image_url if product else '' }}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Mfano: https://mfano.com/picha.jpg">
+                </div>
+
+                <!-- Maelezo -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Maelezo ya Bidhaa</label>
+                    <textarea id="description" name="description" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm">{{ product.description if product else '' }}</textarea>
+                </div>
+
+                <!-- Vifungo vya Hatua -->
+                <div class="flex justify-between items-center pt-4">
+                    <a href="{{ url_for('admin_dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg flex items-center space-x-1">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Rudi Nyuma</span>
+                    </a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                        {% if product %}
+                            <i class="fas fa-save"></i>
+                            <span>Hifadhi Mabadiliko</span>
+                        {% else %}
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ongeza Bidhaa</span>
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+

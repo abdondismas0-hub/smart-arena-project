@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ongeza Tangazo Jipya</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-xl bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
+            <header class="mb-6 border-b pb-4">
+                <h1 class="text-3xl font-extrabold text-gray-900">
+                    <i class="fas fa-bullhorn text-yellow-500 mr-2"></i> Ongeza Tangazo Jipya
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Tangazo hili litaonekana kwenye ukurasa mkuu.</p>
+            </header>
+            
+            <form method="POST" action="{{ url_for('add_post') }}" class="space-y-6">
+                
+                <!-- Kichwa cha Habari -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Kichwa cha Habari</label>
+                    <input type="text" id="title" name="title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Mfano: Punguzo Kubwa la Sikukuu">
+                </div>
+
+                <!-- Maudhui ya Tangazo -->
+                <div>
+                    <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Maudhui ya Tangazo</label>
+                    <textarea id="content" name="content" rows="6" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Andika maelezo kamili ya tangazo hapa..."></textarea>
+                </div>
+
+                <!-- Vifungo vya Hatua -->
+                <div class="flex justify-between items-center pt-4">
+                    <a href="{{ url_for('admin_dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg flex items-center space-x-1">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Rudi Nyuma</span>
+                    </a>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Chapisha Tangazo</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
