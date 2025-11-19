@@ -1,0 +1,12 @@
+[
+  {
+    "order_id": 1001,
+    "product_name": "Smartphone ya 5G (Model X)",
+    "quantity": 1,
+    "total_price": 800000,
+    "customer_name": "Amina Juma",
+    "phone": "0755xxxxxx",
+    "status": "Imeshughulikiwa",
+    "order_date": "2025-11-17 14:00:00"
+  }
+]
