@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# TOLEO LA MWISHO KABISA LA DEPLOYMENT
+# TOLEO LA MWISHO NA FLASK SESSION SALAMA
 
 import json
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
-import datetime # Import kwa ajili ya tarehe salama
+import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 
 # --- UTILITY FUNCTIONS ---
 
@@ -36,12 +36,12 @@ def get_next_id(data_list):
     """Hutafuta ID inayofuata kwa ajili ya bidhaa/maagizo mapya."""
     if not data_list:
         return 1
-    # Huondoa IDs zote na kurudisha kubwa kuliko zote + 1
     return max(item.get('id', 0) for item in data_list if isinstance(item, dict) and 'id' in item) + 1
 
 def get_product_by_id(product_id):
     """Hutafuta bidhaa kwa ID yake."""
     data = load_data(PRODUCTS_FILE)
+    # Tafuta bidhaa kwa uhakika
     for product in data.get('products', []):
         if product.get('id') == product_id:
             return product
@@ -54,8 +54,15 @@ def authenticate(username, password):
 # --- FLASK APP INITIALIZATION ---
 
 app = Flask(__name__)
-app.secret_key = 'smart_arena_super_secret_key_2025'
-ADMIN_SESSION = {}
+# SECRET_KEY NI MUHIMU KWA FLASK SESSION
+app.secret_key = os.environ.get('SECRET_KEY', 'default_strong_secret_key_1234567890') # Tumia Environment variable au default
+app.config['SESSION_COOKIE_SECURE'] = True # Muhimu kwa HTTPS kwenye Render
+
+# --- INITALIZATION YA DATA KWA MARA YA KWANZA ---
+
+# Hakikisha faili za data zinaundwa mara moja server inapoanza.
+load_data(PRODUCTS_FILE)
+load_data(ORDERS_FILE)
 
 # --- ROUTES ZA MTUMIAJI (PUBLIC ROUTES) ---
 
@@ -70,7 +77,10 @@ def smart_arena_home():
 @app.route('/product/<int:product_id>', methods=['GET', 'POST'])
 def product_details(product_id):
     """Ukurasa wa Maelezo ya Bidhaa."""
-    product = get_product_by_id(product_id)
+    # Sasa tutapata bidhaa bila shida
+    product = get_product_by_id(product_id) 
+    
+    # Hii inatatua kosa la 500 kwenye Maelezo Zaidi (kama ID haipo)
     if not product:
         flash('Bidhaa haipatikani.', 'error')
         return redirect(url_for('smart_arena_home'))
@@ -115,7 +125,8 @@ def admin_login():
         password = request.form.get('password')
         
         if authenticate(username, password):
-            ADMIN_SESSION['logged_in'] = True 
+            # Tumia Flask session halisi
+            session['logged_in'] = True 
             flash('Karibu Admin!', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
@@ -126,7 +137,8 @@ def admin_login():
 @app.route('/admin')
 def admin_dashboard():
     """Dashboard ya Admin: Huonyesha bidhaa na maagizo."""
-    if not ADMIN_SESSION.get('logged_in'):
+    # Angalia session ya Flask
+    if not session.get('logged_in'): 
         flash('Tafadhali ingia kama Admin kwanza.', 'error')
         return redirect(url_for('admin_login'))
 
@@ -153,9 +165,7 @@ def admin_dashboard():
 @app.route('/admin/logout')
 def admin_logout():
     """Admin Logout."""
-    if ADMIN_SESSION.get('logged_in'):
-        ADMIN_SESSION['logged_in'] = False
+    if session.get('logged_in'):
+        session.pop('logged_in', None)
         flash('Umetoka Admin Dashboard salama.', 'success')
     return redirect(url_for('smart_arena_home'))
-
-# Hakuna app.run() inahitajika hapa kwa deployment ya Gunicorn.
