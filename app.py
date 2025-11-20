@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# TOLEO KAMILI NA SALAMA KWA DEPLOYMENT YA RENDER/GUNICORN NA JSON SALAMA
+# TOLEO LILILOSAFISHWA NA KUIDHINISHWA KWA AJILI YA RENDER
 
 import json
 import os
@@ -16,26 +16,18 @@ ORDERS_FILE = 'orders.json'
 def load_data(file_name):
     """Hupakia data kutoka JSON file kwa usalama, inarejesha muundo tupu ikiwa kuna hitilafu."""
     try:
-        # Jaribu kufungua na kusoma faili
         with open(file_name, 'r', encoding='utf-8') as f:
-            # Soma yaliyomo yote ya faili
             content = f.read()
-            # Ikiwa faili ni tupu, rudisha muundo salama wa kuanzia
             if not content:
                 raise ValueError("Faili ni tupu.")
-            # Jaribu kuparsing yaliyomo kama JSON
             return json.loads(content)
     except (FileNotFoundError):
-        # Ikiwa faili halipo, rudisha muundo wa kuanzia
         print(f"INFO: {file_name} haipatikani. Inarejesha muundo salama.")
     except (json.JSONDecodeError, ValueError) as e:
-        # Ikiwa kuna kosa la muundo wa JSON au faili ni tupu
         print(f"WARNING: Kosa la JSON Decode kwenye {file_name}: {e}. Inarejesha muundo salama.")
     except Exception as e:
-        # Hitilafu nyingine zozote
         print(f"ERROR: Hitilafu isiyotarajiwa kwenye {file_name}: {e}. Inarejesha muundo salama.")
     
-    # Rejesha muundo wa data tupu sahihi kwa kila faili
     if file_name == PRODUCTS_FILE:
         return {'products': [], 'posts': []}
     return []
@@ -52,11 +44,14 @@ def get_next_id(data_list):
     """Hutafuta ID inayofuata kwa ajili ya bidhaa/maagizo mapya."""
     if not data_list:
         return 1
-    return max(item.get('id', 0) for item in data_list if isinstance(item, dict) and 'id' in item) + 1
+    # Tumia data_list ikiwa ni orodha, au orodha ndani ya dict (kwa products)
+    list_to_check = data_list if isinstance(data_list, list) else data_list.get('products', [])
+    return max(item.get('id', 0) for item in list_to_check if isinstance(item, dict) and 'id' in item) + 1
 
 def get_product_by_id(product_id):
     """Hutafuta bidhaa kwa ID yake."""
     data = load_data(PRODUCTS_FILE)
+    # Hakikisha 'products' inapatikana na ni list
     for product in data.get('products', []):
         if product.get('id') == product_id:
             return product
@@ -69,12 +64,10 @@ def authenticate(username, password):
 # --- FLASK APP INITIALIZATION ---
 
 app = Flask(__name__)
+# Tumia variable ya mazingira kwa siri
 app.secret_key = os.environ.get('SECRET_KEY', 'default_strong_secret_key_1234567890') 
 app.config['SESSION_COOKIE_SECURE'] = True 
-
-# --- INITIALIZATION YA DATA ---
-load_data(PRODUCTS_FILE)
-load_data(ORDERS_FILE)
+app.logger.setLevel('DEBUG')
 
 # --- CUSTOM FILTERS (Inaongeza format_currency) ---
 def format_currency_filter(value):
@@ -82,11 +75,9 @@ def format_currency_filter(value):
     try:
         value = int(value) 
         formatted_value = "{:,.0f}".format(value)
-        # Badilisha koma za kiingereza (,) na nukta za Kitanzania (.) na kinyume chake
-        formatted_value = formatted_value.replace(",", "X").replace(".", ",").replace("X", ".")
         return f"{formatted_value} TZS"
     except (TypeError, ValueError):
-        return str(value) # Rudisha kama string ikiwa imeshindwa
+        return str(value) 
 
 app.jinja_env.filters['format_currency'] = format_currency_filter
 
@@ -138,7 +129,8 @@ def product_details(product_id):
         else:
             flash('Tafadhali jaza Jina Kamili na Namba ya Simu.', 'error')
 
-    return render_template('product_details.html', product=product)
+    # LAINI MUHIMU: Tunahakikisha template inaitwa kwa jina dogo kabisa.
+    return render_template('product_details.html'.lower(), product=product)
 
 # --- ROUTES ZA ADMIN (ADMIN ROUTES) ---
 
@@ -156,7 +148,8 @@ def admin_login():
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
-    return render_template('admin_login.html')
+    # LAINI MUHIMU: Tunahakikisha template inaitwa kwa jina dogo kabisa.
+    return render_template('admin_login.html'.lower())
 
 @app.route('/admin')
 def admin_dashboard():
@@ -171,7 +164,7 @@ def admin_dashboard():
     products = product_data.get('products', [])
     posts = product_data.get('posts', [])
 
-    if not isinstance(orders, list): orders = []
+    if not isinstance(orders, list): orders = [] # Salama
 
     order_summary = {
         'total_orders': len(orders),
@@ -179,7 +172,8 @@ def admin_dashboard():
         'delivered': sum(1 for order in orders if order.get('status') == 'Delivered')
     }
 
-    return render_template('admin.html', 
+    # LAINI MUHIMU: Tunahakikisha template inaitwa kwa jina dogo kabisa.
+    return render_template('admin.html'.lower(), 
                            products=products, 
                            orders=orders, 
                            posts=posts, 
