@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# MAREKEBISHO KWA AJILI YA RENDER: Kusahihisha majina ya templates ili kuendana na Case Sensitivity.
+# MAREKEBISHO YA MWISHO: Kurekebisha TemplateNotFound kwa admin_login.html na product_detail.html
 
 import json
 import os
@@ -135,7 +135,7 @@ def product_details(product_id):
         else:
             flash('Tafadhali jaza Jina Kamili na Namba ya Simu.', 'error')
 
-    # LAINI ILIYOREKEBISHWA: Inatumia 'product_detail.html' kulingana na jina la faili lako.
+    # LAINI SAHIHI: Inatumia 'product_detail.html' (bila 's' mwishoni)
     return render_template('product_detail.html', product=product)
 
 # --- ROUTES ZA ADMIN (ADMIN ROUTES) ---
@@ -157,8 +157,8 @@ def admin_login():
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
-    # LAINI ILIYOREKEBISHWA: Inatumia 'add_login.html' kulingana na jina la faili lako.
-    return render_template('add_login.html') 
+    # LAINI SAHIHI: Inatumia 'admin_login.html' (kama tulivyobadilisha)
+    return render_template('admin_login.html') 
 
 @app.route('/admin')
 def admin_dashboard():
@@ -197,10 +197,8 @@ def admin_logout():
 
 
 # --- INAONGEZA APPLICATION KWA GUNICORN ---
-# Huu ni usaidizi muhimu kwa Gunicorn kwenye Render.
 application = app
 
 # --- KUANZA APP (KWA MAENDELEO TU) ---
 if __name__ == '__main__':
-    # Katika Render, Gunicorn ndiye anayeendesha 'application', siyo hii.
     app.run(debug=True)
