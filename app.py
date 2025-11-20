@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
-# Logic ya nyuma (Backend Logic) kwa Smart Arena E-commerce
-# Imeandikwa kwa kutumia Flask framework
-# TOLEO KAMILI LA DEPLOYMENT (GUNICORN TAYARI)
+# Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
+# TOLEO LA MWISHO KABISA LA DEPLOYMENT
 
 import json
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
+import datetime # Import kwa ajili ya tarehe salama
 
 # --- UTILITY FUNCTIONS ---
 
@@ -14,56 +14,29 @@ PRODUCTS_FILE = 'product.json'
 ORDERS_FILE = 'orders.json'
 
 def load_data(file_name):
-    """
-    Hupakia data kutoka JSON file. 
-    Huunda faili na data ya mwanzo ikiwa halipatikani au lina makosa ya JSON.
-    Hili linahakikisha programu haifi (crash) wakati wa deployment.
-    """
-    if not os.path.exists(file_name):
-        initial_data = []
-        if file_name == PRODUCTS_FILE:
-            initial_data = {
-                'products': [
-                    {'id': 1, 'name': 'Laptop DELL Vostro', 'price': 1200000, 'description': 'Laptop yenye kasi kubwa na RAM 16GB.', 'image_url': 'https://placehold.co/400x300/3c0b0b/FFFFFF?text=DELL+Vostro'},
-                    {'id': 2, 'name': 'Simu Samsung A54', 'price': 750000, 'description': 'Simu mpya yenye kamera kali na betri yenye nguvu.', 'image_url': 'https://placehold.co/400x300/083d1c/FFFFFF?text=SAMSUNG+A54'}
-                ],
-                'posts': [
-                    {'id': 1, 'title': 'Punguzo la 20% kwa Laptops zote!', 'content': 'Ofa hii ni kwa wiki moja tu. Usikose!', 'file_url': 'https://placehold.co/600x200/520138/FFFFFF?text=OFA+KUBWA!'}
-                ]
-            }
-        
-        try:
-            with open(file_name, 'w', encoding='utf-8') as f:
-                json.dump(initial_data, f, indent=4, ensure_ascii=False)
-            return initial_data
-        except Exception:
-            # Rejesha dictionary tupu ikiwa kushindwa kuunda faili
-            return {'products': [], 'posts': []} if file_name == PRODUCTS_FILE else []
-            
+    """Hupakia data kutoka JSON file, inarejesha dictionary tupu ikiwa faili lina matatizo."""
     try:
         with open(file_name, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except json.JSONDecodeError:
-        # Rejesha dictionary tupu ikiwa faili lipo lakini lina makosa ya JSON
-        return {'products': [], 'posts': []} if file_name == PRODUCTS_FILE else []
-    except Exception:
-        # Catch errors nyingine (kama permissions)
-        return {'products': [], 'posts': []} if file_name == PRODUCTS_FILE else []
+    except (FileNotFoundError, json.JSONDecodeError, Exception):
+        # Ikiwa kuna tatizo, rudisha muundo wa data tupu sahihi
+        if file_name == PRODUCTS_FILE:
+            return {'products': [], 'posts': []}
+        return []
 
 def save_data(data, file_name):
-    """Huhifadhi data kwenye JSON file. Inatumia try/except kuhakikisha stability."""
+    """Huhifadhi data kwenye JSON file."""
     try:
         with open(file_name, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
     except Exception as e:
         print(f"ERROR: Failed to save data to {file_name}: {e}")
-        # Hatutumi flash hapa kwa sababu saving inafanyika kwenye POST requests
 
 def get_next_id(data_list):
     """Hutafuta ID inayofuata kwa ajili ya bidhaa/maagizo mapya."""
     if not data_list:
         return 1
-    # Hakikisha 'id' inapatikana kabla ya kutafuta max
+    # Huondoa IDs zote na kurudisha kubwa kuliko zote + 1
     return max(item.get('id', 0) for item in data_list if isinstance(item, dict) and 'id' in item) + 1
 
 def get_product_by_id(product_id):
@@ -75,16 +48,13 @@ def get_product_by_id(product_id):
     return None
 
 def authenticate(username, password):
-    """Mfumo wa uthibitisho (authentication) rahisi kwa Admin."""
+    """Mfumo wa uthibitisho rahisi kwa Admin."""
     return username == "admin" and password == "12345"
 
 # --- FLASK APP INITIALIZATION ---
 
 app = Flask(__name__)
-# SECRET_KEY NI MUHIMU KWA FLASH MESSAGES
 app.secret_key = 'smart_arena_super_secret_key_2025'
-
-# Tumia dictionary rahisi kuhifadhi hali ya kuingia
 ADMIN_SESSION = {}
 
 # --- ROUTES ZA MTUMIAJI (PUBLIC ROUTES) ---
@@ -99,9 +69,8 @@ def smart_arena_home():
 
 @app.route('/product/<int:product_id>', methods=['GET', 'POST'])
 def product_details(product_id):
-    """Ukurasa wa Maelezo ya Bidhaa: Huonyesha maelezo na fomu ya agizo."""
+    """Ukurasa wa Maelezo ya Bidhaa."""
     product = get_product_by_id(product_id)
-
     if not product:
         flash('Bidhaa haipatikani.', 'error')
         return redirect(url_for('smart_arena_home'))
@@ -114,8 +83,6 @@ def product_details(product_id):
             orders = load_data(ORDERS_FILE)
             if not isinstance(orders, list): orders = []
 
-            # Tumia datetime kwa tarehe (salama kuliko os.popen)
-            import datetime
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             new_order = {
@@ -191,9 +158,4 @@ def admin_logout():
         flash('Umetoka Admin Dashboard salama.', 'success')
     return redirect(url_for('smart_arena_home'))
 
-
-# --- INITALIZATION (Inafanya kazi mara moja kwenye Gunicorn) ---
-
-# Hakikisha faili za data zinaundwa mara moja server inapoanza.
-load_data(PRODUCTS_FILE)
-load_data(ORDERS_FILE)
+# Hakuna app.run() inahitajika hapa kwa deployment ya Gunicorn.
