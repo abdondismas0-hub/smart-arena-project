@@ -1,27 +1,26 @@
 {
-        "products": [
-            {
-                "id": 1,
-                "name": "Laptop HP Pavilion",
-                "price": 950000,
-                "description": "Laptop yenye kasi kubwa kwa ajili ya kazi za ofisini.",
-                "image_url": "https://placehold.co/400x300/185e7a/FFFFFF?text=Laptop+HP"
-            },
-            {
-                "id": 2,
-                "name": "Headphones za Sony WH-1000XM4",
-                "price": 500000,
-                "description": "Noise-cancelling, kwa muziki safi.",
-                "image_url": "https://placehold.co/400x300/a30101/FFFFFF?text=SONY+Headphones"
-            }
-        ],
-        "posts": [
-            {
-                "id": 1,
-                "title": "Karibu Smart Arena!",
-                "content": "Tumefungua rasmi kwa bidhaa bora za elektroniki.",
-                "file_url": "https://placehold.co/600x200/520138/FFFFFF?text=WELCOME"
-            }
-        ]
-    }
-    
+    "products": [
+        {
+            "id": 1,
+            "name": "Laptop HP Pavilion",
+            "price": 950000,
+            "description": "Laptop yenye kasi kubwa kwa ajili ya kazi za ofisini.",
+            "image_url": "https://placehold.co/400x300/185e7a/FFFFFF?text=Laptop+HP"
+        },
+        {
+            "id": 2,
+            "name": "Headphones za Sony WH-1000XM4",
+            "price": 500000,
+            "description": "Noise-cancelling, kwa muziki safi.",
+            "image_url": "https://placehold.co/400x300/a30101/FFFFFF?text=SONY+Headphones"
+        }
+    ],
+    "posts": [
+        {
+            "id": 1,
+            "title": "Karibu Smart Arena!",
+            "content": "Tumefungua rasmi kwa bidhaa bora za elektroniki.",
+            "file_url": "https://placehold.co/600x200/520138/FFFFFF?text=WELCOME"
+        }
+    ]
+}
