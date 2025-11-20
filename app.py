@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# TOLEO LILILOSAFISHWA NA KUANZA UPYA KWA AJILI YA RENDER
+# MAREKEBISHO KWA AJILI YA RENDER: Kusahihisha majina ya templates ili kuendana na Case Sensitivity.
 
 import json
 import os
@@ -13,7 +13,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 PRODUCTS_FILE = 'product.json'
 ORDERS_FILE = 'orders.json'
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "12345" # Tafadhali badilisha hii baadaye kwa usalama
+ADMIN_PASSWORD = "12345" 
 
 def load_data(file_name):
     """Hupakia data kutoka JSON file kwa usalama."""
@@ -21,18 +21,22 @@ def load_data(file_name):
         with open(file_name, 'r', encoding='utf-8') as f:
             content = f.read()
             if not content:
-                raise ValueError("Faili ni tupu.")
+                # Rudisha muundo sahihi ikiwa faili ni tupu lakini ipo
+                if file_name == PRODUCTS_FILE:
+                    return {'products': [], 'posts': []}
+                return []
             return json.loads(content)
-    except (FileNotFoundError):
+    except FileNotFoundError:
         print(f"INFO: {file_name} haipatikani. Inarejesha muundo salama.")
     except (json.JSONDecodeError, ValueError) as e:
-        print(f"WARNING: Kosa la JSON Decode kwenye {file_name}: {e}.")
+        print(f"WARNING: Kosa la JSON Decode kwenye {file_name}: {e}. Inarejesha muundo salama.")
     except Exception as e:
         print(f"ERROR: Hitilafu isiyotarajiwa kwenye {file_name}: {e}.")
     
+    # Rudisha muundo salama wa default ikiwa kuna hitilafu
     if file_name == PRODUCTS_FILE:
         return {'products': [], 'posts': []}
-    return [] # orders.json inatarajiwa kuwa list
+    return [] 
 
 def save_data(data, file_name):
     """Huhifadhi data kwenye JSON file kwa usalama."""
@@ -42,23 +46,17 @@ def save_data(data, file_name):
     except Exception as e:
         print(f"ERROR: Ilishindwa kuhifadhi data kwenye {file_name}: {e}")
 
-def get_next_id(data_list, key='id'):
-    """Hutafuta ID inayofuata kwa ajili ya bidhaa/maagizo mapya."""
-    list_to_check = []
-    if isinstance(data_list, list):
-        list_to_check = data_list
-    elif isinstance(data_list, dict) and 'products' in data_list:
-        list_to_check = data_list.get('products', [])
-    
-    if not list_to_check:
-        return 1
-    return max(item.get(key, 0) for item in list_to_check if isinstance(item, dict) and key in item) + 1
+# Function rahisi ya kupata ID mpya
+def get_next_id(items):
+    return max([item.get('id', 0) for item in items], default=0) + 1
 
 def get_product_by_id(product_id):
     """Hutafuta bidhaa kwa ID yake."""
     data = load_data(PRODUCTS_FILE)
+    # Tuhakikishe product_id inabadilishwa kuwa int kwa kulinganisha
+    product_id_int = int(product_id) if isinstance(product_id, str) and product_id.isdigit() else product_id
     for product in data.get('products', []):
-        if product.get('id') == product_id:
+        if product.get('id') == product_id_int:
             return product
     return None
 
@@ -68,7 +66,11 @@ def authenticate(username, password):
 
 # --- FLASK APP INITIALIZATION ---
 
-app = Flask(__name__)
+# Usanidi kwa ajili ya Render: kuhakikisha folda za templates na static zinatambulika
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='static') 
+            
 app.secret_key = os.environ.get('SECRET_KEY', 'default_strong_secret_key_1234567890') 
 app.config['SESSION_COOKIE_SECURE'] = True 
 app.logger.setLevel('DEBUG') 
@@ -77,6 +79,7 @@ app.logger.setLevel('DEBUG')
 def format_currency_filter(value):
     """Huongeza koma (,) kwenye namba na kuongeza ' TZS'."""
     try:
+        # Punguza thamani kuwa integer kabla ya formatting
         value = int(value) 
         formatted_value = "{:,.0f}".format(value)
         return f"{formatted_value} TZS"
@@ -132,13 +135,17 @@ def product_details(product_id):
         else:
             flash('Tafadhali jaza Jina Kamili na Namba ya Simu.', 'error')
 
-    return render_template('product_details.html', product=product)
+    # LAINI ILIYOREKEBISHWA: Inatumia 'product_detail.html' kulingana na jina la faili lako.
+    return render_template('product_detail.html', product=product)
 
 # --- ROUTES ZA ADMIN (ADMIN ROUTES) ---
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     """Ukurasa wa Kuingia kwa Admin."""
+    if session.get('logged_in'): 
+        return redirect(url_for('admin_dashboard'))
+        
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -150,7 +157,8 @@ def admin_login():
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
-    return render_template('admin_login.html')
+    # LAINI ILIYOREKEBISHWA: Inatumia 'add_login.html' kulingana na jina la faili lako.
+    return render_template('add_login.html') 
 
 @app.route('/admin')
 def admin_dashboard():
@@ -187,6 +195,12 @@ def admin_logout():
         flash('Umetoka Admin Dashboard salama.', 'success')
     return redirect(url_for('smart_arena_home'))
 
-# --- KUANZA APP ---
+
+# --- INAONGEZA APPLICATION KWA GUNICORN ---
+# Huu ni usaidizi muhimu kwa Gunicorn kwenye Render.
+application = app
+
+# --- KUANZA APP (KWA MAENDELEO TU) ---
 if __name__ == '__main__':
+    # Katika Render, Gunicorn ndiye anayeendesha 'application', siyo hii.
     app.run(debug=True)
