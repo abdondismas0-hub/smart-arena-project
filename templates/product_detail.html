@@ -3,119 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maelezo ya {{ product.name }} | Smart Arena</title>
-    <!-- Tailwind CSS CDN -->
+    <title>{{ product.name }} | Smart Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 90%;
+            margin: auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
     </style>
 </head>
-<body class="antialiased bg-gray-50">
-
-    <!-- HEADER: Imekamilika Kwenye index.html, tutaweka placeholder tu -->
-    <header class="bg-white shadow-md sticky top-0 z-10">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="{{ url_for('smart_arena_home') }}" class="text-2xl font-extrabold text-blue-600 hover:text-blue-700 transition duration-300">
-                <i class="fas fa-mobile-alt mr-1"></i> Smart Arena
-            </a>
-            <!-- Viungo Vifupi -->
-            <a href="{{ url_for('smart_arena_home') }}" class="text-sm font-semibold text-gray-600 hover:text-blue-600 flex items-center space-x-1">
-                <i class="fas fa-home"></i> <span>Nyumbani</span>
-            </a>
+<body>
+    <header class="bg-white shadow-md">
+        <div class="container flex justify-between items-center py-4">
+            <h1 class="text-2xl font-bold text-blue-600">Smart Arena</h1>
+            <nav class="space-x-4">
+                <a href="{{ url_for('smart_arena_home') }}" class="text-gray-700 hover:text-blue-600">Nyumbani</a>
+                <a href="{{ url_for('admin_login') }}" class="text-gray-700 hover:text-blue-600">Admin</a>
+            </nav>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8">
-        
-        <!-- Flash Messages -->
+    <main class="container mt-8">
+        <!-- Ujumbe wa Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="mb-4">
                     {% for category, message in messages %}
-                        <div class="p-4 mb-2 rounded-lg shadow-md text-white 
-                            {% if category == 'error' %}bg-red-500{% elif category == 'success' %}bg-green-500{% else %}bg-blue-500{% endif %}">
-                            <i class="fas fa-info-circle mr-2"></i>{{ message }}
+                        <div class="p-3 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ message }}
                         </div>
                     {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
 
-        <!-- Ukurasa Mkuu wa Maelezo ya Bidhaa -->
-        <section class="bg-white p-6 md:p-10 rounded-xl shadow-lg border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            
-            <!-- Upande wa Kushoto: Picha na Maelezo -->
-            <div>
-                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-auto rounded-xl shadow-md border-4 border-gray-100 object-cover object-center"
-                     onerror="this.onerror=null; this.src='https://placehold.co/600x600/000/FFF?text={{ product.name|replace(' ', '+') }}';"
-                     loading="lazy">
-                
-                <div class="mt-8">
-                    <h2 class="text-3xl font-extrabold text-gray-900 mb-4">{{ product.name }}</h2>
-                    <p class="text-lg font-medium text-gray-500 mb-6">
-                        <span class="text-sm font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full uppercase">{{ product.category }}</span>
-                    </p>
-                    
-                    <h3 class="text-xl font-bold text-gray-800 mb-3 border-b pb-2">Maelezo Kamili</h3>
-                    <p class="text-gray-600 leading-relaxed">{{ product.description }}</p>
-                </div>
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Picha ya Bidhaa -->
+            <div class="card p-4">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-auto object-cover rounded-lg shadow-inner" onerror="this.onerror=null;this.src='https://placehold.co/600x400/CCCCCC/333333?text=Hakuna+Picha';">
             </div>
             
-            <!-- Upande wa Kulia: Bei na Fomu ya Agizo -->
-            <div class="sticky top-20 h-fit">
-                <!-- Kadi ya Bei -->
-                <div class="bg-blue-50 p-6 rounded-xl shadow-inner mb-8 border-l-4 border-blue-600">
-                    <p class="text-lg font-semibold text-gray-600">Bei Yetu:</p>
-                    <p class="text-5xl font-extrabold text-red-600 mt-1">
-                        {{ "{:,.0f}".format(product.price) }} 
-                        <span class="text-xl font-normal text-gray-500">TZS</span>
-                    </p>
-                    <p class="text-sm text-green-600 font-bold mt-2 flex items-center">
-                        <i class="fas fa-check-circle mr-2"></i> Bei nafuu na Ubora wa Uhakika
-                    </p>
+            <!-- Maelezo ya Bidhaa na Fomu ya Kuagiza -->
+            <div class="space-y-6">
+                <div class="card p-6">
+                    <h2 class="text-4xl font-extrabold text-gray-900">{{ product.name }}</h2>
+                    <p class="text-blue-600 text-3xl font-bold mt-2">{{ product.price | format_currency }}</p>
+                    <p class="text-gray-600 mt-4">{{ product.description }}</p>
                 </div>
 
-                <!-- Fomu ya Kuweka Agizo -->
-                <div class="bg-white p-6 rounded-xl shadow-2xl border border-blue-200">
-                    <h3 class="text-2xl font-bold text-blue-700 mb-4 flex items-center">
-                        <i class="fas fa-shopping-basket mr-3"></i> Weka Agizo Sasa
-                    </h3>
-                    <form method="POST" action="{{ url_for('product_details', product_id=product.id) }}" class="space-y-4">
-                        <!-- Input Jina -->
-                        <div>
-                            <label for="customer_name" class="block text-sm font-medium text-gray-700">Jina Kamili:</label>
-                            <input type="text" id="customer_name" name="customer_name" required
-                                   class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
-                                   placeholder="Mfano: Juma Abdi">
+                <div class="card p-6 border-t-4 border-blue-500">
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">Agiza Bidhaa Hii Sasa</h3>
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">Jina Kamili</label>
+                            <input type="text" id="customer_name" name="customer_name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         </div>
-                        
-                        <!-- Input Namba ya Simu -->
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700">Namba ya Simu (WhatsApp/Kawaida):</label>
-                            <input type="tel" id="phone" name="phone" required
-                                   class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
-                                   placeholder="Mfano: 07XX XXX XXX">
+                        <div class="mb-6">
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Namba ya Simu</label>
+                            <input type="tel" id="phone" name="phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         </div>
-                        
-                        <!-- Kifungo cha Kutuma -->
-                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-md hover:shadow-lg transition duration-300 transform hover:scale-[1.01] flex items-center justify-center space-x-2">
-                            <i class="fas fa-hand-point-right text-lg"></i>
-                            <span>Thibitisha Agizo la {{ "{:,.0f}".format(product.price) }} TZS</span>
+                        <button type="submit" class="btn-primary w-full shadow-lg hover:shadow-xl">
+                            <i class="fas fa-shopping-cart mr-2"></i> Tuma Agizo
                         </button>
-                        <p class="text-xs text-gray-500 mt-2 text-center">Baada ya kutuma, tutakupigia simu kuthibitisha mahali pa kukuletea.</p>
                     </form>
                 </div>
             </div>
-            
-        </section>
-
+        </div>
+        
     </main>
-
-    <!-- Footer Imetolewa (Haitajwi tena hapa, inatakiwa iwe sehemu ya base.html au iwekwe hapa kwa completeness) -->
-
+    <footer class="mt-12 py-4 text-center text-sm text-gray-500 bg-white shadow-inner">
+        &copy; 2025 Smart Arena TZ. Haki zote zimehifadhiwa.
+    </footer>
+    <!-- Font Awesome kwa icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
 
