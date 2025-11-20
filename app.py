@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# TOLEO LILILOSAFISHWA NA KUIDHINISHWA KWA AJILI YA RENDER
+# TOLEO LILILOSAFISHWA NA KUANZA UPYA KWA AJILI YA RENDER
 
 import json
 import os
 import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 
-# --- UTILITY FUNCTIONS ---
+# --- UTILITY CONSTANTS AND FUNCTIONS ---
 
 PRODUCTS_FILE = 'product.json'
 ORDERS_FILE = 'orders.json'
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "12345" # Tafadhali badilisha hii baadaye kwa usalama
 
 def load_data(file_name):
-    """Hupakia data kutoka JSON file kwa usalama, inarejesha muundo tupu ikiwa kuna hitilafu."""
+    """Hupakia data kutoka JSON file kwa usalama."""
     try:
         with open(file_name, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -24,13 +26,13 @@ def load_data(file_name):
     except (FileNotFoundError):
         print(f"INFO: {file_name} haipatikani. Inarejesha muundo salama.")
     except (json.JSONDecodeError, ValueError) as e:
-        print(f"WARNING: Kosa la JSON Decode kwenye {file_name}: {e}. Inarejesha muundo salama.")
+        print(f"WARNING: Kosa la JSON Decode kwenye {file_name}: {e}.")
     except Exception as e:
-        print(f"ERROR: Hitilafu isiyotarajiwa kwenye {file_name}: {e}. Inarejesha muundo salama.")
+        print(f"ERROR: Hitilafu isiyotarajiwa kwenye {file_name}: {e}.")
     
     if file_name == PRODUCTS_FILE:
         return {'products': [], 'posts': []}
-    return []
+    return [] # orders.json inatarajiwa kuwa list
 
 def save_data(data, file_name):
     """Huhifadhi data kwenye JSON file kwa usalama."""
@@ -40,18 +42,21 @@ def save_data(data, file_name):
     except Exception as e:
         print(f"ERROR: Ilishindwa kuhifadhi data kwenye {file_name}: {e}")
 
-def get_next_id(data_list):
+def get_next_id(data_list, key='id'):
     """Hutafuta ID inayofuata kwa ajili ya bidhaa/maagizo mapya."""
-    if not data_list:
+    list_to_check = []
+    if isinstance(data_list, list):
+        list_to_check = data_list
+    elif isinstance(data_list, dict) and 'products' in data_list:
+        list_to_check = data_list.get('products', [])
+    
+    if not list_to_check:
         return 1
-    # Tumia data_list ikiwa ni orodha, au orodha ndani ya dict (kwa products)
-    list_to_check = data_list if isinstance(data_list, list) else data_list.get('products', [])
-    return max(item.get('id', 0) for item in list_to_check if isinstance(item, dict) and 'id' in item) + 1
+    return max(item.get(key, 0) for item in list_to_check if isinstance(item, dict) and key in item) + 1
 
 def get_product_by_id(product_id):
     """Hutafuta bidhaa kwa ID yake."""
     data = load_data(PRODUCTS_FILE)
-    # Hakikisha 'products' inapatikana na ni list
     for product in data.get('products', []):
         if product.get('id') == product_id:
             return product
@@ -59,17 +64,16 @@ def get_product_by_id(product_id):
 
 def authenticate(username, password):
     """Mfumo wa uthibitisho rahisi kwa Admin."""
-    return username == "admin" and password == "12345"
+    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
 
 # --- FLASK APP INITIALIZATION ---
 
 app = Flask(__name__)
-# Tumia variable ya mazingira kwa siri
 app.secret_key = os.environ.get('SECRET_KEY', 'default_strong_secret_key_1234567890') 
 app.config['SESSION_COOKIE_SECURE'] = True 
-app.logger.setLevel('DEBUG')
+app.logger.setLevel('DEBUG') 
 
-# --- CUSTOM FILTERS (Inaongeza format_currency) ---
+# --- CUSTOM FILTERS ---
 def format_currency_filter(value):
     """Huongeza koma (,) kwenye namba na kuongeza ' TZS'."""
     try:
@@ -81,12 +85,11 @@ def format_currency_filter(value):
 
 app.jinja_env.filters['format_currency'] = format_currency_filter
 
-
 # --- ROUTES ZA MTUMIAJI (PUBLIC ROUTES) ---
 
 @app.route('/')
 def smart_arena_home():
-    """Ukurasa wa Nyumbani: Huonyesha bidhaa na matangazo yote."""
+    """Ukurasa wa Nyumbani."""
     data = load_data(PRODUCTS_FILE)
     return render_template('index.html', 
                            products=data.get('products', []),
@@ -129,8 +132,7 @@ def product_details(product_id):
         else:
             flash('Tafadhali jaza Jina Kamili na Namba ya Simu.', 'error')
 
-    # LAINI MUHIMU: Tunahakikisha template inaitwa kwa jina dogo kabisa.
-    return render_template('product_details.html'.lower(), product=product)
+    return render_template('product_details.html', product=product)
 
 # --- ROUTES ZA ADMIN (ADMIN ROUTES) ---
 
@@ -148,8 +150,7 @@ def admin_login():
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
-    # LAINI MUHIMU: Tunahakikisha template inaitwa kwa jina dogo kabisa.
-    return render_template('admin_login.html'.lower())
+    return render_template('admin_login.html')
 
 @app.route('/admin')
 def admin_dashboard():
@@ -164,7 +165,7 @@ def admin_dashboard():
     products = product_data.get('products', [])
     posts = product_data.get('posts', [])
 
-    if not isinstance(orders, list): orders = [] # Salama
+    if not isinstance(orders, list): orders = [] 
 
     order_summary = {
         'total_orders': len(orders),
@@ -172,8 +173,7 @@ def admin_dashboard():
         'delivered': sum(1 for order in orders if order.get('status') == 'Delivered')
     }
 
-    # LAINI MUHIMU: Tunahakikisha template inaitwa kwa jina dogo kabisa.
-    return render_template('admin.html'.lower(), 
+    return render_template('admin.html', 
                            products=products, 
                            orders=orders, 
                            posts=posts, 
@@ -186,3 +186,7 @@ def admin_logout():
         session.pop('logged_in', None)
         flash('Umetoka Admin Dashboard salama.', 'success')
     return redirect(url_for('smart_arena_home'))
+
+# --- KUANZA APP ---
+if __name__ == '__main__':
+    app.run(debug=True)
