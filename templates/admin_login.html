@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Smart Arena</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0;
+        }
+        .login-card {
+            background-color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            margin-top: 5rem;
+        }
+    </style>
+</head>
+<body class="flex justify-center items-start min-h-screen">
+    <div class="login-card p-8 md:p-10">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Admin Login</h1>
+        <p class="text-center text-gray-500 mb-8">Ingia ili kudhibiti bidhaa na maagizo.</p>
+
+        <!-- Ujumbe wa Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for category, message in messages %}
+                        <div class="p-3 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            <i class="fas fa-info-circle mr-2"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Hapa tunatumia njia wazi '/admin_login' badala ya url_for -->
+        <form method="POST" action="/admin_login"> 
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 text-sm font-medium mb-2">Jina la Mtumiaji</label>
+                <input type="text" id="username" name="username" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="admin">
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 text-sm font-medium mb-2">Neno la Siri</label>
+                <input type="password" id="password" name="password" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="12345">
+            </div>
+            <button type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300">
+                Ingia
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <!-- Hapa bado tunatumia url_for kwa sababu haifanyi POST request -->
+            <a href="{{ url_for('smart_arena_home') }}" class="text-sm text-blue-500 hover:text-blue-700 transition duration-150">Rudi Nyumbani</a>
+        </div>
+    </div>
+</body>
+</html>
+
