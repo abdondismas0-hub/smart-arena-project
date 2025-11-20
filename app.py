@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# TOLEO LA MWISHO NA FLASK SESSION SALAMA
+# TOLEO KAMILI NA SALAMA KWA DEPLOYMENT YA RENDER/GUNICORN
 
 import json
 import os
@@ -14,12 +14,13 @@ PRODUCTS_FILE = 'product.json'
 ORDERS_FILE = 'orders.json'
 
 def load_data(file_name):
-    """Hupakia data kutoka JSON file, inarejesha dictionary tupu ikiwa faili lina matatizo."""
+    """Hupakia data kutoka JSON file, inarejesha dictionary au list tupu ikiwa faili lina matatizo."""
     try:
         with open(file_name, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError, Exception):
+    except (FileNotFoundError, json.JSONDecodeError):
         # Ikiwa kuna tatizo, rudisha muundo wa data tupu sahihi
+        print(f"INFO: Failed to load {file_name}. Returning safe empty structure.")
         if file_name == PRODUCTS_FILE:
             return {'products': [], 'posts': []}
         return []
@@ -36,6 +37,7 @@ def get_next_id(data_list):
     """Hutafuta ID inayofuata kwa ajili ya bidhaa/maagizo mapya."""
     if not data_list:
         return 1
+    # Huhesabu ID kubwa zaidi kutoka kwenye orodha
     return max(item.get('id', 0) for item in data_list if isinstance(item, dict) and 'id' in item) + 1
 
 def get_product_by_id(product_id):
@@ -43,6 +45,7 @@ def get_product_by_id(product_id):
     data = load_data(PRODUCTS_FILE)
     # Tafuta bidhaa kwa uhakika
     for product in data.get('products', []):
+        # Hakikisha ID zinalinganishwa kwa aina (int)
         if product.get('id') == product_id:
             return product
     return None
@@ -54,15 +57,30 @@ def authenticate(username, password):
 # --- FLASK APP INITIALIZATION ---
 
 app = Flask(__name__)
-# SECRET_KEY NI MUHIMU KWA FLASK SESSION
-app.secret_key = os.environ.get('SECRET_KEY', 'default_strong_secret_key_1234567890') # Tumia Environment variable au default
+# SECRET_KEY NI MUHIMU KWA FLASK SESSION. Inafanya kazi kwenye Render.
+app.secret_key = os.environ.get('SECRET_KEY', 'default_strong_secret_key_1234567890') 
 app.config['SESSION_COOKIE_SECURE'] = True # Muhimu kwa HTTPS kwenye Render
 
-# --- INITALIZATION YA DATA KWA MARA YA KWANZA ---
-
-# Hakikisha faili za data zinaundwa mara moja server inapoanza.
+# --- INITIALIZATION YA DATA (Kufanya data ianze kupakiwa mara moja) ---
 load_data(PRODUCTS_FILE)
 load_data(ORDERS_FILE)
+
+# --- CUSTOM FILTERS (Inatatua UndefinedError kwenye templates) ---
+def format_currency_filter(value):
+    """Huongeza koma (,) kwenye namba na kuongeza ' TZS'."""
+    try:
+        value = int(value) # Hakikisha ni namba kamili
+        # Fomati namba kwa koma (e.g., 1,000,000)
+        formatted_value = "{:,.0f}".format(value)
+        # Badilisha koma za kiingereza (,) na nukta za Kitanzania (.) na kinyume chake
+        formatted_value = formatted_value.replace(",", "X").replace(".", ",").replace("X", ".")
+        return f"{formatted_value} TZS"
+    except (TypeError, ValueError):
+        return value
+
+# KUSANIFU: Kuweka filter iweze kutumika kwenye templates zote
+app.jinja_env.filters['format_currency'] = format_currency_filter
+
 
 # --- ROUTES ZA MTUMIAJI (PUBLIC ROUTES) ---
 
@@ -77,10 +95,9 @@ def smart_arena_home():
 @app.route('/product/<int:product_id>', methods=['GET', 'POST'])
 def product_details(product_id):
     """Ukurasa wa Maelezo ya Bidhaa."""
-    # Sasa tutapata bidhaa bila shida
     product = get_product_by_id(product_id) 
     
-    # Hii inatatua kosa la 500 kwenye Maelezo Zaidi (kama ID haipo)
+    # Hili linazuia 500 Error ikiwa bidhaa haipo
     if not product:
         flash('Bidhaa haipatikani.', 'error')
         return redirect(url_for('smart_arena_home'))
@@ -125,19 +142,19 @@ def admin_login():
         password = request.form.get('password')
         
         if authenticate(username, password):
-            # Tumia Flask session halisi
             session['logged_in'] = True 
             flash('Karibu Admin!', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
+    # Hili linaweza kusababisha 500 kama template admin_login.html haipo au ina kosa
     return render_template('admin_login.html')
 
 @app.route('/admin')
 def admin_dashboard():
     """Dashboard ya Admin: Huonyesha bidhaa na maagizo."""
-    # Angalia session ya Flask
+    # Angalia session ya Flask - inatatua 500 error ya session
     if not session.get('logged_in'): 
         flash('Tafadhali ingia kama Admin kwanza.', 'error')
         return redirect(url_for('admin_login'))
@@ -156,6 +173,7 @@ def admin_dashboard():
         'delivered': sum(1 for order in orders if order.get('status') == 'Delivered')
     }
 
+    # Hii inahitaji admin.html kutumia format_currency_filter
     return render_template('admin.html', 
                            products=products, 
                            orders=orders, 
