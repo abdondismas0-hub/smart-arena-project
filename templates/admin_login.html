@@ -3,67 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Smart Arena</title>
+    <title>Admin Dashboard - Smart Arena</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #e2e8f0;
-        }
-        .login-card {
-            background-color: white;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            border-radius: 12px;
-            max-width: 400px;
-            width: 90%;
-            margin-top: 5rem;
+            background-color: #f1f5f9;
         }
     </style>
 </head>
-<body class="flex justify-center items-start min-h-screen">
-    <div class="login-card p-8 md:p-10">
-        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Admin Login</h1>
-        <p class="text-center text-gray-500 mb-8">Ingia ili kudhibiti bidhaa na maagizo.</p>
+<body>
+    <div class="container mx-auto p-4 md:p-10">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-3xl font-extrabold text-blue-700">Admin Dashboard</h1>
+            <a href="{{ url_for('admin_logout') }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150">
+                Toka
+            </a>
+        </div>
 
         <!-- Ujumbe wa Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="mb-6">
                     {% for category, message in messages %}
-                        <div class="p-3 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                            <i class="fas fa-info-circle mr-2"></i> {{ message }}
+                        <div class="p-4 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ message }}
                         </div>
                     {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
 
-        <!-- Hapa tunatumia njia wazi '/admin_login' badala ya url_for -->
-        <form method="POST" action="/admin_login"> 
-            <div class="mb-4">
-                <label for="username" class="block text-gray-700 text-sm font-medium mb-2">Jina la Mtumiaji</label>
-                <input type="text" id="username" name="username" required 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="admin">
-            </div>
-            <div class="mb-6">
-                <label for="password" class="block text-gray-700 text-sm font-medium mb-2">Neno la Siri</label>
-                <input type="password" id="password" name="password" required 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       placeholder="12345">
-            </div>
-            <button type="submit" 
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300">
-                Ingia
-            </button>
-        </form>
-
-        <div class="mt-6 text-center">
-            <!-- Hapa bado tunatumia url_for kwa sababu haifanyi POST request -->
-            <a href="{{ url_for('smart_arena_home') }}" class="text-sm text-blue-500 hover:text-blue-700 transition duration-150">Rudi Nyumbani</a>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Muhtasari wa Maagizo</h2>
+            <p class="mb-2">Jumla ya Maagizo: <span class="font-bold text-blue-600">{{ order_summary.total_orders }}</span></p>
+            <p class="mb-2">Inasubiri (Pending): <span class="font-bold text-yellow-600">{{ order_summary.pending }}</span></p>
+            <p class="mb-4">Yametolewa (Delivered): <span class="font-bold text-green-600">{{ order_summary.delivered }}</span></p>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-gray-800">Orodha ya Bidhaa ({{ products | length }})</h2>
+            {% if products %}
+                <ul class="space-y-3">
+                    {% for product in products %}
+                        <li class="p-3 bg-gray-50 border border-gray-200 rounded-lg flex justify-between items-center">
+                            <span>{{ product.name }} - {{ product.price | format_currency }}</span>
+                            <!-- Tutatumia kiungo rahisi kwa sasa -->
+                            <a href="#" class="text-sm text-blue-500 hover:text-blue-700">Angalia</a> 
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500">Hakuna bidhaa zilizopo.</p>
+            {% endif %}
         </div>
+        
     </div>
 </body>
 </html>
