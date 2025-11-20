@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | Smart Arena</title>
+    <title>Admin Dashboard | Smart Arena</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,42 +12,53 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            color: #1f2937;
         }
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 2rem;
+        .container {
+            max-width: 95%;
+            margin: auto;
+            padding: 20px 10px;
+        }
+        .card {
             background-color: white;
             border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
+        .tab-button.active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
             font-weight: 600;
-            transition: background-color 0.3s;
         }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
+        .status-pending { background-color: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 4px; }
+        .status-delivered { background-color: #d1fae5; color: #059669; padding: 2px 8px; border-radius: 4px; }
+        /* Responsive Table */
+        .responsive-table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .responsive-table th, .responsive-table td {
+            white-space: nowrap;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-6">Ingia Admin</h2>
-        
+    <div class="container">
+        <header class="flex justify-between items-center py-4 px-2 mb-6 border-b border-gray-200">
+            <h1 class="text-3xl font-bold text-blue-600">Admin Dashboard</h1>
+            <a href="{{ url_for('admin_logout') }}" class="text-sm bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+                <i class="fas fa-sign-out-alt"></i> Toka
+            </a>
+        </header>
+
         <!-- Ujumbe wa Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="mb-4">
+                <div class="mb-6">
                     {% for category, message in messages %}
-                        <div class="p-3 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        <div class="p-4 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -55,22 +66,182 @@
             {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('admin_login') }}" class="space-y-4">
-            <div>
-                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Jina la Mtumiaji</label>
-                <input type="text" id="username" name="username" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+        <!-- Muhtasari wa Maagizo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="card p-6 border-l-4 border-blue-500">
+                <p class="text-sm font-medium text-gray-500">Maagizo Yote</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ order_summary.total_orders }}</p>
             </div>
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Neno la Siri</label>
-                <input type="password" id="password" name="password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <div class="card p-6 border-l-4 border-yellow-500">
+                <p class="text-sm font-medium text-gray-500">Maagizo Yanasubiri</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ order_summary.pending }}</p>
             </div>
-            <p class="text-sm text-gray-500 italic">Tumia: admin / 12345</p>
-            <button type="submit" class="btn-primary w-full mt-4">Ingia</button>
-        </form>
-        <div class="mt-6 text-center">
-            <a href="{{ url_for('smart_arena_home') }}" class="text-sm text-blue-600 hover:text-blue-800">Rudi Nyumbani</a>
+            <div class="card p-6 border-l-4 border-green-500">
+                <p class="text-sm font-medium text-gray-500">Maagizo Yametolewa</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ order_summary.delivered }}</p>
+            </div>
         </div>
+
+        <!-- Navigation ya Tab -->
+        <div class="flex border-b border-gray-300 mb-6 space-x-4" id="admin-tabs">
+            <button class="tab-button active pb-2 px-3 text-lg" data-tab="orders">Maagizo</button>
+            <button class="tab-button pb-2 px-3 text-lg" data-tab="products">Bidhaa</button>
+            <button class="tab-button pb-2 px-3 text-lg" data-tab="posts">Matangazo</button>
+        </div>
+
+        <!-- MAAGIZO (ORDERS) TAB -->
+        <div id="orders" class="tab-content">
+            <h2 class="text-2xl font-semibold mb-4">Orodha ya Maagizo</h2>
+            <div class="card responsive-table-container">
+                {% if orders %}
+                    <table class="responsive-table w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th>ID</th>
+                                <th>Bidhaa</th>
+                                <th>Jina la Mteja</th>
+                                <th>Simu</th>
+                                <th>Bei</th>
+                                <th>Tarehe</th>
+                                <th>Hali</th>
+                                <th>Vitendo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders | reverse %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.product_name }}</td>
+                                    <td>{{ order.customer_name }}</td>
+                                    <td>{{ order.phone }}</td>
+                                    <td>{{ order.price | format_currency }}</td>
+                                    <td>{{ order.date }}</td>
+                                    <td>
+                                        <span class="status-{{ order.status | lower }}">{{ order.status }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="text-blue-500 hover:text-blue-700 text-sm">Badili</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="p-4 text-gray-500">Hakuna maagizo yaliyopokelewa bado.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- BIDHAA (PRODUCTS) TAB -->
+        <div id="products" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-semibold">Orodha ya Bidhaa</h2>
+                <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    <i class="fas fa-plus"></i> Ongeza Bidhaa
+                </a>
+            </div>
+            <div class="card responsive-table-container">
+                 {% if products %}
+                    <table class="responsive-table w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th>ID</th>
+                                <th>Jina la Bidhaa</th>
+                                <th>Bei</th>
+                                <th>Maelezo</th>
+                                <th>Vitendo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.price | format_currency }}</td>
+                                    <td>{{ product.description | truncate(60, True, '...') }}</td>
+                                    <td>
+                                        <a href="#" class="text-yellow-600 hover:text-yellow-800 text-sm mr-3">Hariri</a>
+                                        <a href="#" class="text-red-600 hover:text-red-800 text-sm">Futa</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="p-4 text-gray-500">Hakuna bidhaa zilizoongezwa bado.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- MATANGAZO (POSTS) TAB -->
+        <div id="posts" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-semibold">Orodha ya Matangazo</h2>
+                <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    <i class="fas fa-plus"></i> Ongeza Tangazo
+                </a>
+            </div>
+             <div class="card responsive-table-container">
+                 {% if posts %}
+                    <table class="responsive-table w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th>ID</th>
+                                <th>Kichwa</th>
+                                <th>Yaliyomo</th>
+                                <th>Vitendo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for post in posts %}
+                                <tr>
+                                    <td>{{ post.id }}</td>
+                                    <td>{{ post.title }}</td>
+                                    <td>{{ post.content | truncate(60, True, '...') }}</td>
+                                    <td>
+                                        <a href="#" class="text-yellow-600 hover:text-yellow-800 text-sm mr-3">Hariri</a>
+                                        <a href="#" class="text-red-600 hover:text-red-800 text-sm">Futa</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                 {% else %}
+                    <p class="p-4 text-gray-500">Hakuna matangazo yaliyopatikana bado.</p>
+                 {% endif %}
+            </div>
+        </div>
+
     </div>
+
+    <!-- JavaScript kwa ajili ya Tab Switching -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Ondoa active kutoka kwa tabs zote
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Ficha contents zote
+                    contents.forEach(c => c.classList.add('hidden'));
+
+                    // Weka active kwenye tab iliyobofya
+                    tab.classList.add('active');
+                    
+                    // Onyesha content husika
+                    const targetId = tab.getAttribute('data-tab');
+                    const targetContent = document.getElementById(targetId);
+                    if (targetContent) {
+                        targetContent.classList.remove('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- Font Awesome kwa icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
 
