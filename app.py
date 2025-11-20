@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# MAREKEBISHO YA MWISHO: Kurekebisha TemplateNotFound kwa admin_login.html na product_detail.html
+# MAREKEBISHO: Kuboresha load_data na admin_dashboard kwa ajili ya usalama wa muundo wa data.
 
 import json
 import os
@@ -16,27 +16,37 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "12345" 
 
 def load_data(file_name):
-    """Hupakia data kutoka JSON file kwa usalama."""
+    """Hupakia data kutoka JSON file kwa usalama, ikirudisha muundo wa default ({} au []) ikiwa kuna kosa."""
+    default_structure = [] if file_name == ORDERS_FILE else {'products': [], 'posts': []}
+    
     try:
         with open(file_name, 'r', encoding='utf-8') as f:
-            content = f.read()
+            content = f.read().strip()
             if not content:
-                # Rudisha muundo sahihi ikiwa faili ni tupu lakini ipo
-                if file_name == PRODUCTS_FILE:
-                    return {'products': [], 'posts': []}
+                print(f"INFO: {file_name} ni tupu.")
+                return default_structure
+            
+            data = json.loads(content)
+            
+            # Kufanya uhakika wa muundo (kwa usalama zaidi)
+            if file_name == ORDERS_FILE and not isinstance(data, list):
+                print(f"WARNING: {ORDERS_FILE} haikurudisha List. Inarudisha default List.")
                 return []
-            return json.loads(content)
+            if file_name == PRODUCTS_FILE and not isinstance(data, dict):
+                print(f"WARNING: {PRODUCTS_FILE} haikurudisha Dictionary. Inarudisha default Dictionary.")
+                return {'products': [], 'posts': []}
+                
+            return data
+            
     except FileNotFoundError:
         print(f"INFO: {file_name} haipatikani. Inarejesha muundo salama.")
     except (json.JSONDecodeError, ValueError) as e:
-        print(f"WARNING: Kosa la JSON Decode kwenye {file_name}: {e}. Inarejesha muundo salama.")
+        # Hili ndilo kosa la msingi linaloweza kusababisha hitilafu 500
+        print(f"CRITICAL ERROR: Kosa la JSON Decode kwenye {file_name}: {e}. Hakikisha faili haina herufi za ziada au mabano yasiyo sahihi. Inarejesha muundo salama.")
     except Exception as e:
         print(f"ERROR: Hitilafu isiyotarajiwa kwenye {file_name}: {e}.")
     
-    # Rudisha muundo salama wa default ikiwa kuna hitilafu
-    if file_name == PRODUCTS_FILE:
-        return {'products': [], 'posts': []}
-    return [] 
+    return default_structure
 
 def save_data(data, file_name):
     """Huhifadhi data kwenye JSON file kwa usalama."""
@@ -48,6 +58,10 @@ def save_data(data, file_name):
 
 # Function rahisi ya kupata ID mpya
 def get_next_id(items):
+    # Inaboreshwa ili kufanya kazi kwa dictionaries/lists zinazopokelewa
+    if isinstance(items, dict) and 'products' in items:
+        items = items['products'] # Ikiwa ni product_data
+    
     return max([item.get('id', 0) for item in items], default=0) + 1
 
 def get_product_by_id(product_id):
@@ -113,7 +127,8 @@ def product_details(product_id):
 
         if customer_name and phone:
             orders = load_data(ORDERS_FILE)
-            if not isinstance(orders, list): orders = []
+            # Hakikisha orders ni list kabla ya kuitumia
+            if not isinstance(orders, list): orders = [] 
 
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -135,7 +150,7 @@ def product_details(product_id):
         else:
             flash('Tafadhali jaza Jina Kamili na Namba ya Simu.', 'error')
 
-    # LAINI SAHIHI: Inatumia 'product_detail.html' (bila 's' mwishoni)
+    # LAINI SAHIHI
     return render_template('product_detail.html', product=product)
 
 # --- ROUTES ZA ADMIN (ADMIN ROUTES) ---
@@ -157,7 +172,7 @@ def admin_login():
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
-    # LAINI SAHIHI: Inatumia 'admin_login.html' (kama tulivyobadilisha)
+    # LAINI SAHIHI
     return render_template('admin_login.html') 
 
 @app.route('/admin')
@@ -170,9 +185,11 @@ def admin_dashboard():
     product_data = load_data(PRODUCTS_FILE)
     orders = load_data(ORDERS_FILE)
     
+    # Hakikisha unatumia .get na muundo salama kila wakati
     products = product_data.get('products', [])
     posts = product_data.get('posts', [])
 
+    # Hapa ndipo palipokuwa na shida. Ikiwa orders haikuweza kupakiwa kama list, tunatumia list tupu.
     if not isinstance(orders, list): orders = [] 
 
     order_summary = {
