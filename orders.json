@@ -1,1 +1,22 @@
-[]
+[
+    {
+        "id": 1,
+        "product_id": 1,
+        "product_name": "Laptop HP ProBook",
+        "price": 950000,
+        "customer_name": "John Doe",
+        "phone": "07XXXXXXXX",
+        "status": "Delivered",
+        "date": "2025-11-20 09:00:00"
+    },
+    {
+        "id": 2,
+        "product_id": 2,
+        "product_name": "SONY Headphones WH-1000XM4",
+        "price": 500000,
+        "customer_name": "Jane Smith",
+        "phone": "06XXXXXXXX",
+        "status": "Pending",
+        "date": "2025-11-20 10:30:00"
+    }
+]
