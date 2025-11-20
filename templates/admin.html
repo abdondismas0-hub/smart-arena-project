@@ -3,185 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Smart Arena</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Admin Login | Smart Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
     </style>
 </head>
-<body class="antialiased bg-gray-100">
-
-    <!-- Header/Navigation kwa Admin -->
-    <header class="bg-white shadow-lg">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-3xl font-extrabold text-blue-600">Admin Dashboard</h1>
-            <div class="flex items-center space-x-4">
-                <a href="{{ url_for('smart_arena_home') }}" class="text-sm font-semibold text-gray-600 hover:text-blue-600 transition duration-300 flex items-center space-x-1 p-2 rounded-lg bg-gray-50 hover:bg-gray-100">
-                    <i class="fas fa-store"></i>
-                    <span>Rudi Dukani</span>
-                </a>
-                
-                <!-- Kifungo cha Logout -->
-                <a href="{{ url_for('admin_logout') }}" class="text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition duration-300 flex items-center space-x-1 p-2 rounded-lg shadow-md">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Toka (Logout)</span>
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="container mx-auto mt-4 px-4">
-                {% for category, message in messages %}
-                    <div class="p-4 mb-4 rounded-lg shadow-md text-white 
-                        {% if category == 'error' %}bg-red-500{% elif category == 'success' %}bg-green-500{% else %}bg-blue-500{% endif %}">
-                        <i class="fas fa-info-circle mr-2"></i>{{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <main class="container mx-auto px-4 py-8 space-y-12">
+<body>
+    <div class="login-container">
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-6">Ingia Admin</h2>
         
-        <!-- SEHEMU YA BIDHAA -->
-        <section class="bg-white p-6 rounded-xl shadow-xl border border-gray-200">
-            <div class="flex justify-between items-center mb-6 border-b pb-3">
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center space-x-2">
-                    <i class="fas fa-box-open text-blue-500"></i>
-                    <span>Bidhaa Zote</span>
-                </h2>
-                <a href="{{ url_for('add_product') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md flex items-center space-x-1">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Ongeza Bidhaa Mpya</span>
-                </a>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jina</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bei (TZS)</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategoria</th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Vitendo</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for product in products %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ product.id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ product.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ "{:,.0f}".format(product.price) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">{{ product.category }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                                <a href="{{ url_for('edit_product', product_id=product.id) }}" class="text-indigo-600 hover:text-indigo-900 p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100">
-                                    <i class="fas fa-edit"></i> Hariri
-                                </a>
-                                <a href="{{ url_for('delete_product', product_id=product.id) }}" onclick="return confirm('Una uhakika unataka kufuta bidhaa hii: {{ product.name }}?')" class="text-red-600 hover:text-red-900 p-2 rounded-lg bg-red-50 hover:bg-red-100">
-                                    <i class="fas fa-trash"></i> Futa
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- SEHEMU YA MATANGAZO -->
-        <section class="bg-white p-6 rounded-xl shadow-xl border border-gray-200">
-            <div class="flex justify-between items-center mb-6 border-b pb-3">
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center space-x-2">
-                    <i class="fas fa-bullhorn text-yellow-600"></i>
-                    <span>Matangazo ya Blogu</span>
-                </h2>
-                <a href="{{ url_for('add_post') }}" class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md flex items-center space-x-1">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Andika Tangazo Jipya</span>
-                </a>
-            </div>
-            
-            <div class="space-y-4">
-                {% for post in posts %}
-                <div class="border border-gray-100 p-4 rounded-lg bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <p class="text-lg font-semibold text-gray-800">{{ post.title }}</p>
-                        <p class="text-sm text-gray-500 truncate">{{ post.content | truncate(100) }}</p>
-                    </div>
-                    <div>
-                        <a href="{{ url_for('delete_post', post_id=post.id) }}" onclick="return confirm('Una uhakika unataka kufuta tangazo hili: {{ post.title }}?')" class="text-red-600 hover:text-red-900 p-2 rounded-lg bg-red-100 hover:bg-red-200">
-                            <i class="fas fa-trash"></i> Futa
-                        </a>
-                    </div>
+        <!-- Ujumbe wa Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for category, message in messages %}
+                        <div class="p-3 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-        </section>
+            {% endif %}
+        {% endwith %}
 
-        <!-- SEHEMU YA MAAGIZO -->
-        <section class="bg-white p-6 rounded-xl shadow-xl border border-gray-200">
-            <div class="flex justify-between items-center mb-6 border-b pb-3">
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center space-x-2">
-                    <i class="fas fa-receipt text-green-600"></i>
-                    <span>Maagizo Mapya (Orders)</span>
-                </h2>
+        <form method="POST" action="{{ url_for('admin_login') }}" class="space-y-4">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Jina la Mtumiaji</label>
+                <input type="text" id="username" name="username" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
             </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bidhaa</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mteja</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Simu</th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hali</th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Vitendo</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for order in orders %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ order.product_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ order.customer_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ order.phone }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-bold">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if order.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif order.status == 'Complete' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                                    {{ order.status }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                                {% if order.status != 'Complete' %}
-                                    <a href="{{ url_for('update_order_status', order_id=order.id, status='Complete') }}" class="text-green-600 hover:text-green-900 p-2 rounded-lg bg-green-50 hover:bg-green-100">
-                                        <i class="fas fa-check-circle"></i> Kamilisha
-                                    </a>
-                                {% endif %}
-                                <a href="{{ url_for('update_order_status', order_id=order.id, status='Canceled') }}" class="text-red-600 hover:text-red-900 p-2 rounded-lg bg-red-50 hover:bg-red-100">
-                                    <i class="fas fa-times-circle"></i> Ghairi
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Neno la Siri</label>
+                <input type="password" id="password" name="password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
             </div>
-        </section>
-        
-    </main>
-
-    <footer class="text-center p-4 mt-8 text-gray-500 border-t border-gray-200">
-        &copy; 2024 Smart Arena Admin | Powered by Flask
-    </footer>
+            <p class="text-sm text-gray-500 italic">Tumia: admin / 12345</p>
+            <button type="submit" class="btn-primary w-full mt-4">Ingia</button>
+        </form>
+        <div class="mt-6 text-center">
+            <a href="{{ url_for('smart_arena_home') }}" class="text-sm text-blue-600 hover:text-blue-800">Rudi Nyumbani</a>
+        </div>
+    </div>
 </body>
 </html>
 
