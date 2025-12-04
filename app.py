@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# MAREKEBISHO: Kuboresha load_data na admin_dashboard kwa ajili ya usalama wa muundo wa data.
+# MAREKEBISHO: Kuhakikisha majina ya template ni sahihi na load_data ni imara.
 
 import json
 import os
@@ -17,18 +17,23 @@ ADMIN_PASSWORD = "12345"
 
 def load_data(file_name):
     """Hupakia data kutoka JSON file kwa usalama, ikirudisha muundo wa default ({} au []) ikiwa kuna kosa."""
+    # Muundo wa default: product.json ni dictionary, orders.json ni list
     default_structure = [] if file_name == ORDERS_FILE else {'products': [], 'posts': []}
     
     try:
+        if not os.path.exists(file_name):
+            print(f"INFO: {file_name} haipatikani. Inarejesha muundo salama.")
+            return default_structure
+            
         with open(file_name, 'r', encoding='utf-8') as f:
             content = f.read().strip()
             if not content:
-                print(f"INFO: {file_name} ni tupu.")
+                print(f"INFO: {file_name} ni tupu. Inarejesha muundo salama.")
                 return default_structure
             
             data = json.loads(content)
             
-            # Kufanya uhakika wa muundo (kwa usalama zaidi)
+            # Kufanya uhakika wa muundo
             if file_name == ORDERS_FILE and not isinstance(data, list):
                 print(f"WARNING: {ORDERS_FILE} haikurudisha List. Inarudisha default List.")
                 return []
@@ -38,11 +43,8 @@ def load_data(file_name):
                 
             return data
             
-    except FileNotFoundError:
-        print(f"INFO: {file_name} haipatikani. Inarejesha muundo salama.")
     except (json.JSONDecodeError, ValueError) as e:
-        # Hili ndilo kosa la msingi linaloweza kusababisha hitilafu 500
-        print(f"CRITICAL ERROR: Kosa la JSON Decode kwenye {file_name}: {e}. Hakikisha faili haina herufi za ziada au mabano yasiyo sahihi. Inarejesha muundo salama.")
+        print(f"CRITICAL ERROR: Kosa la JSON Decode kwenye {file_name}: {e}. Inarejesha muundo salama.")
     except Exception as e:
         print(f"ERROR: Hitilafu isiyotarajiwa kwenye {file_name}: {e}.")
     
@@ -60,14 +62,13 @@ def save_data(data, file_name):
 def get_next_id(items):
     # Inaboreshwa ili kufanya kazi kwa dictionaries/lists zinazopokelewa
     if isinstance(items, dict) and 'products' in items:
-        items = items['products'] # Ikiwa ni product_data
+        items = items['products'] 
     
     return max([item.get('id', 0) for item in items], default=0) + 1
 
 def get_product_by_id(product_id):
     """Hutafuta bidhaa kwa ID yake."""
     data = load_data(PRODUCTS_FILE)
-    # Tuhakikishe product_id inabadilishwa kuwa int kwa kulinganisha
     product_id_int = int(product_id) if isinstance(product_id, str) and product_id.isdigit() else product_id
     for product in data.get('products', []):
         if product.get('id') == product_id_int:
@@ -80,7 +81,6 @@ def authenticate(username, password):
 
 # --- FLASK APP INITIALIZATION ---
 
-# Usanidi kwa ajili ya Render: kuhakikisha folda za templates na static zinatambulika
 app = Flask(__name__, 
             template_folder='templates',
             static_folder='static') 
@@ -93,7 +93,6 @@ app.logger.setLevel('DEBUG')
 def format_currency_filter(value):
     """Huongeza koma (,) kwenye namba na kuongeza ' TZS'."""
     try:
-        # Punguza thamani kuwa integer kabla ya formatting
         value = int(value) 
         formatted_value = "{:,.0f}".format(value)
         return f"{formatted_value} TZS"
@@ -114,7 +113,7 @@ def smart_arena_home():
 
 @app.route('/product/<int:product_id>', methods=['GET', 'POST'])
 def product_details(product_id):
-    """Ukurasa wa Maelezo ya Bidhaa."""
+    """Ukurasa wa Maelezo ya Bidhaa. (Inatumia product_detail.html)"""
     product = get_product_by_id(product_id) 
     
     if not product:
@@ -127,7 +126,6 @@ def product_details(product_id):
 
         if customer_name and phone:
             orders = load_data(ORDERS_FILE)
-            # Hakikisha orders ni list kabla ya kuitumia
             if not isinstance(orders, list): orders = [] 
 
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -150,14 +148,14 @@ def product_details(product_id):
         else:
             flash('Tafadhali jaza Jina Kamili na Namba ya Simu.', 'error')
 
-    # LAINI SAHIHI
+    # Hapa tunatumia product_detail.html
     return render_template('product_detail.html', product=product)
 
 # --- ROUTES ZA ADMIN (ADMIN ROUTES) ---
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
-    """Ukurasa wa Kuingia kwa Admin."""
+    """Ukurasa wa Kuingia kwa Admin. (Inatumia admin_login.html)"""
     if session.get('logged_in'): 
         return redirect(url_for('admin_dashboard'))
         
@@ -172,12 +170,12 @@ def admin_login():
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
-    # LAINI SAHIHI
+    # Hapa tunatumia admin_login.html
     return render_template('admin_login.html') 
 
 @app.route('/admin')
 def admin_dashboard():
-    """Dashboard ya Admin: Huonyesha bidhaa na maagizo."""
+    """Dashboard ya Admin: Huonyesha bidhaa na maagizo. (Inatumia admin.html)"""
     if not session.get('logged_in'): 
         flash('Tafadhali ingia kama Admin kwanza.', 'error')
         return redirect(url_for('admin_login'))
@@ -185,11 +183,9 @@ def admin_dashboard():
     product_data = load_data(PRODUCTS_FILE)
     orders = load_data(ORDERS_FILE)
     
-    # Hakikisha unatumia .get na muundo salama kila wakati
     products = product_data.get('products', [])
     posts = product_data.get('posts', [])
 
-    # Hapa ndipo palipokuwa na shida. Ikiwa orders haikuweza kupakiwa kama list, tunatumia list tupu.
     if not isinstance(orders, list): orders = [] 
 
     order_summary = {
@@ -198,6 +194,7 @@ def admin_dashboard():
         'delivered': sum(1 for order in orders if order.get('status') == 'Delivered')
     }
 
+    # Hapa tunatumia admin.html
     return render_template('admin.html', 
                            products=products, 
                            orders=orders, 
