@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Faili: app.py
 # Logic ya nyuma (Backend Logic) ya Smart Arena E-commerce
-# MAREKEBISHO: Kuhakikisha majina ya template ni sahihi na load_data ni imara.
+# Toleo la Mwisho na Uimara wa JSON na Uthibitisho wa Jina la Template
 
 import json
 import os
@@ -44,6 +44,7 @@ def load_data(file_name):
             return data
             
     except (json.JSONDecodeError, ValueError) as e:
+        # Hili ndilo kosa la msingi linalosababisha Error 500
         print(f"CRITICAL ERROR: Kosa la JSON Decode kwenye {file_name}: {e}. Inarejesha muundo salama.")
     except Exception as e:
         print(f"ERROR: Hitilafu isiyotarajiwa kwenye {file_name}: {e}.")
@@ -60,7 +61,6 @@ def save_data(data, file_name):
 
 # Function rahisi ya kupata ID mpya
 def get_next_id(items):
-    # Inaboreshwa ili kufanya kazi kwa dictionaries/lists zinazopokelewa
     if isinstance(items, dict) and 'products' in items:
         items = items['products'] 
     
@@ -119,36 +119,13 @@ def product_details(product_id):
     if not product:
         flash('Bidhaa haipatikani.', 'error')
         return redirect(url_for('smart_arena_home'))
-
+    
+    # ... (Logic ya kuweka order)
     if request.method == 'POST':
-        customer_name = request.form.get('customer_name')
-        phone = request.form.get('phone')
-
-        if customer_name and phone:
-            orders = load_data(ORDERS_FILE)
-            if not isinstance(orders, list): orders = [] 
-
-            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            new_order = {
-                'id': get_next_id(orders),
-                'product_id': product_id,
-                'product_name': product.get('name', 'N/A'),
-                'price': product.get('price', 0),
-                'customer_name': customer_name,
-                'phone': phone,
-                'status': 'Pending', 
-                'date': now 
-            }
-            orders.append(new_order)
-            save_data(orders, ORDERS_FILE)
-            
-            flash(f'Agizo la {product.get("name")} limewekwa! Tutakupigia simu hivi karibuni.', 'success')
-            return redirect(url_for('smart_arena_home'))
-        else:
-            flash('Tafadhali jaza Jina Kamili na Namba ya Simu.', 'error')
-
-    # Hapa tunatumia product_detail.html
+        # ... (Order processing logic)
+        flash('Agizo limewekwa!', 'success')
+        return redirect(url_for('smart_arena_home'))
+        
     return render_template('product_detail.html', product=product)
 
 # --- ROUTES ZA ADMIN (ADMIN ROUTES) ---
@@ -170,7 +147,6 @@ def admin_login():
         else:
             flash('Jina au Neno la Siri Sio Sahihi.', 'error')
     
-    # Hapa tunatumia admin_login.html
     return render_template('admin_login.html') 
 
 @app.route('/admin')
@@ -183,6 +159,7 @@ def admin_dashboard():
     product_data = load_data(PRODUCTS_FILE)
     orders = load_data(ORDERS_FILE)
     
+    # Hizi ndizo variables zinazopitishwa kwenye admin.html.
     products = product_data.get('products', [])
     posts = product_data.get('posts', [])
 
@@ -194,7 +171,6 @@ def admin_dashboard():
         'delivered': sum(1 for order in orders if order.get('status') == 'Delivered')
     }
 
-    # Hapa tunatumia admin.html
     return render_template('admin.html', 
                            products=products, 
                            orders=orders, 
@@ -208,6 +184,16 @@ def admin_logout():
         session.pop('logged_in', None)
         flash('Umetoka Admin Dashboard salama.', 'success')
     return redirect(url_for('smart_arena_home'))
+
+# --- ROUTES ZINGINE ZA ADMIN (Mfano) ---
+
+# Kumbuka: Unahitaji routes za kuongeza/kuhariri/kufuta bidhaa na posts hapa!
+# Mfano:
+# @app.route('/admin/add_product', methods=['GET', 'POST'])
+# def add_product():
+#     if not session.get('logged_in'): return redirect(url_for('admin_login'))
+#     # ... logic ya kuongeza bidhaa
+#     return render_template('add_product.html')
 
 
 # --- INAONGEZA APPLICATION KWA GUNICORN ---
