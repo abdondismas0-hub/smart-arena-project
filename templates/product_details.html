@@ -1,106 +1,31 @@
 <!DOCTYPE html>
-<html lang="sw">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} | Smart Arena</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Load Tailwind CSS from CDN -->
+    <title>{{ product.name }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
-            color: #1f2937;
-        }
-        .container {
-            max-width: 90%;
-            margin: auto;
-            padding: 20px;
-        }
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-    </style>
 </head>
-<body>
-    <header class="bg-white shadow-md">
-        <div class="container flex justify-between items-center py-4">
-            <h1 class="text-2xl font-bold text-blue-600">Smart Arena</h1>
-            <nav class="space-x-4">
-                <a href="{{ url_for('smart_arena_home') }}" class="text-gray-700 hover:text-blue-600">Nyumbani</a>
-                <a href="{{ url_for('admin_login') }}" class="text-gray-700 hover:text-blue-600">Admin</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="container mt-8">
-        <!-- Ujumbe wa Flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="mb-4">
-                    {% for category, message in messages %}
-                        <div class="p-3 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        <div class="grid md:grid-cols-2 gap-8">
-            <!-- Picha ya Bidhaa -->
-            <div class="card p-4">
-                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-auto object-cover rounded-lg shadow-inner" onerror="this.onerror=null;this.src='https://placehold.co/600x400/CCCCCC/333333?text=Hakuna+Picha';">
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto p-4">
+        <a href="/" class="text-blue-500 mb-4 inline-block">&larr; Rudi Nyumbani</a>
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden md:flex">
+            <div class="md:w-1/2">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-64 md:h-full object-cover">
             </div>
-            
-            <!-- Maelezo ya Bidhaa na Fomu ya Kuagiza -->
-            <div class="space-y-6">
-                <div class="card p-6">
-                    <h2 class="text-4xl font-extrabold text-gray-900">{{ product.name }}</h2>
-                    <p class="text-blue-600 text-3xl font-bold mt-2">{{ product.price | format_currency }}</p>
-                    <p class="text-gray-600 mt-4">{{ product.description }}</p>
-                </div>
-
-                <div class="card p-6 border-t-4 border-blue-500">
-                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">Agiza Bidhaa Hii Sasa</h3>
-                    <form method="POST">
-                        <div class="mb-4">
-                            <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">Jina Kamili</label>
-                            <input type="text" id="customer_name" name="customer_name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div class="mb-6">
-                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Namba ya Simu</label>
-                            <input type="tel" id="phone" name="phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <button type="submit" class="btn-primary w-full shadow-lg hover:shadow-xl">
-                            <i class="fas fa-shopping-cart mr-2"></i> Tuma Agizo
-                        </button>
-                    </form>
-                </div>
+            <div class="p-8 md:w-1/2">
+                <h1 class="text-3xl font-bold mb-2">{{ product.name }}</h1>
+                <p class="text-2xl text-green-600 font-bold mb-4">{{ product.price | format_currency }}</p>
+                <p class="text-gray-600 mb-6">{{ product.description }}</p>
+                
+                <form method="POST" class="border-t pt-4">
+                    <h3 class="text-xl font-semibold mb-4">Weka Agizo</h3>
+                    <input type="text" name="customer_name" placeholder="Jina Lako" class="w-full p-2 border rounded mb-2" required>
+                    <input type="text" name="phone" placeholder="Namba ya Simu" class="w-full p-2 border rounded mb-4" required>
+                    <button class="w-full bg-green-600 text-white p-3 rounded font-bold hover:bg-green-700">Tuma Agizo</button>
+                </form>
             </div>
         </div>
-        
-    </main>
-    <footer class="mt-12 py-4 text-center text-sm text-gray-500 bg-white shadow-inner">
-        &copy; 2025 Smart Arena TZ. Haki zote zimehifadhiwa.
-    </footer>
-    <!-- Font Awesome kwa icons -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    </div>
 </body>
 </html>
+
 
