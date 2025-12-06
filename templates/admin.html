@@ -26,37 +26,39 @@
         </header>
 
         <!-- Messages Flash -->
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="mb-4">
-                {% for message in messages %}
-                    <div class="p-3 bg-green-100 text-green-700 rounded-lg">{{ message }}</div>
+                {% for category, message in messages %}
+                    <div class="p-3 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">{{ message }}</div>
                 {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
 
         <!-- Muhtasari wa Maagizo (Order Summary) -->
+        <!-- HAPA NDIPO KOSA LILIKUWA LIKITOKEA, SASA IMESALAMA KWA KUTUMIA order_summary -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
             <div class="card p-5 border-l-4 border-indigo-500">
                 <p class="text-sm font-medium text-gray-500">Jumla ya Maagizo</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">{{ orders|length }}</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">{{ order_summary.total }}</p>
             </div>
             <div class="card p-5 border-l-4 border-yellow-500">
-                <p class="text-sm font-medium text-gray-500">Bidhaa Zote</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">{{ products|length }}</p>
+                <p class="text-sm font-medium text-gray-500">Maagizo Yanayosubiri</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">{{ order_summary.pending }}</p>
             </div>
             <div class="card p-5 border-l-4 border-green-500">
-                <p class="text-sm font-medium text-gray-500">Matangazo</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">{{ posts|length }}</p>
+                <p class="text-sm font-medium text-gray-500">Yaliyokamilika</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">{{ order_summary.delivered }}</p>
             </div>
         </div>
 
         <!-- Usimamizi wa Bidhaa (Product Management) -->
         <section class="mb-10">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">Usimamizi wa Bidhaa</h2>
-                <a href="{{ url_for('add_product') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Ongeza Bidhaa Mpya</a>
+                <h2 class="text-xl font-bold text-gray-800">Usimamizi wa Bidhaa ({{ products|length }})</h2>
+                <!-- Hakikisha una route ya add_product au badilisha link hapa -->
+                <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Ongeza Bidhaa Mpya</a>
             </div>
             <div class="card p-4 overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -75,7 +77,6 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">{{ product.price | format_currency }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.category }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                <!-- Hizi routes zinahitaji templates zake -->
                                 <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Hariri</a> 
                                 <a href="#" class="text-red-600 hover:text-red-900">Futa</a>
                             </td>
@@ -83,28 +84,48 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                {% if not products %}
+                    <p class="text-center py-4 text-gray-500">Hakuna bidhaa zilizopatikana.</p>
+                {% endif %}
             </div>
         </section>
 
         <!-- Maagizo Mapya (Orders List) -->
         <section>
-             <h2 class="text-xl font-bold text-gray-800 mb-4">Maagizo Yaliyopokelewa</h2>
+             <h2 class="text-xl font-bold text-gray-800 mb-4">Maagizo Yaliyopokelewa ({{ orders|length }})</h2>
              <div class="card p-4 overflow-x-auto">
-                <!-- Tutatumia table rahisi kwa sasa -->
-                 <ul class="space-y-2">
-                     {% for order in orders %}
-                         <li class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
-                             <span>{{ order.customer_name }} - {{ order.product_name }}</span>
-                             <span class="text-sm font-bold text-yellow-600">{{ order.status }}</span>
-                         </li>
-                     {% endfor %}
-                 </ul>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jina Mteja</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bidhaa</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hali</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarehe</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in orders %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.customer_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ order.product_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if order.status == 'Pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif order.status == 'Delivered' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if not orders %}
+                    <p class="text-center py-4 text-gray-500">Hakuna maagizo yaliyopokelewa bado.</p>
+                {% endif %}
              </div>
         </section>
-    </main>
-
-    <div class="text-center mt-8 pb-4">
-        <a href="{{ url_for('smart_arena_home') }}" class="text-blue-500 hover:text-blue-700">Rudi Nyumbani</a>
     </div>
 </body>
 </html>
