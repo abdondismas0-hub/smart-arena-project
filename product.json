@@ -1,28 +1,27 @@
-
+{
     "products": [
         {
             "id": 1,
-            "name": "Laptop HP ProBook",
-            "price": 950000,
-            "description": "Laptop ya kisasa yenye uwezo mkubwa wa kufanya kazi mbalimbali na betri inayokaa muda mrefu.",
-            "image": "https://placehold.co/400x300/1e293b/ffffff?text=Laptop+HP",
-            "category": "Electronics"
+            "name": "Simu ya Mkononi (Samsung)",
+            "price": 450000,
+            "description": "Simu mpya yenye kamera kali na betri ya kudumu.",
+            "category": "Electronics",
+            "image_url": "https://placehold.co/400x300/805ad5/ffffff?text=Simu+1"
         },
         {
             "id": 2,
-            "name": "SONY Headphones WH-1000XM4",
-            "price": 500000,
-            "description": "Headphones zenye teknolojia ya kisasa ya kupunguza kelele, zikitoa sauti safi kabisa.",
-            "image": "https://placehold.co/400x300/b91c1c/ffffff?text=Sony+Headphones",
-            "category": "Accessories"
+            "name": "Laptop (HP ProBook)",
+            "price": 1200000,
+            "description": "Laptop yenye utendaji wa haraka kwa kazi na masomo.",
+            "category": "Electronics",
+            "image_url": "https://placehold.co/400x300/4c51bf/ffffff?text=Laptop+2"
         }
     ],
     "posts": [
         {
-            "id": 1,
-            "title": "Karibu Smart Arena",
-            "content": "Tumefungua maduka yetu mtandaoni. Fanya manunuzi kwa urahisi.",
-            "date": "2025-01-01"
+            "id": 101,
+            "title": "Punguzo Kubwa la Msimu",
+            "content": "Tumepunguza bei za bidhaa zote kwa 15% msimu huu!"
         }
     ]
 }
