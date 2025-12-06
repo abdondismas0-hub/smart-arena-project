@@ -4,143 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Smart Arena</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
-        .card { background-color: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); }
+        .card { background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
 <body>
-    <!-- Kichwa (Header) -->
-    <header class="bg-indigo-600 shadow-md">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
-            <a href="{{ url_for('admin_logout') }}" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-semibold hover:bg-indigo-100 transition duration-150">Logout</a>
-        </div>
-    </header>
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Kichwa na Logout -->
+        <header class="flex justify-between items-center pb-4 mb-8 border-b border-gray-300">
+            <h1 class="text-3xl font-extrabold text-indigo-600">Admin Dashboard</h1>
+            <a href="{{ url_for('admin_logout') }}" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150">
+                <i class="fas fa-sign-out-alt mr-1"></i> Toka
+            </a>
+        </header>
 
-    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Messages Flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% with messages = get_flashed_messages() %}
             {% if messages %}
-                {% for category, message in messages %}
-                <div class="p-3 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
-                    {{ message }}
-                </div>
+                <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-3 bg-green-100 text-green-700 rounded-lg">{{ message }}</div>
                 {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
         <!-- Muhtasari wa Maagizo (Order Summary) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            <div class="card p-6 text-center border-t-4 border-indigo-500">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <div class="card p-5 border-l-4 border-indigo-500">
                 <p class="text-sm font-medium text-gray-500">Jumla ya Maagizo</p>
-                <!-- HAKIKISHA order_summary.total_orders IPO HIVI -->
-                <p class="mt-1 text-3xl font-semibold text-gray-900">{{ order_summary.total_orders }}</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">{{ orders|length }}</p>
             </div>
-            <div class="card p-6 text-center border-t-4 border-yellow-500">
-                <p class="text-sm font-medium text-gray-500">Maagizo Yanayosubiri</p>
-                <!-- HAKIKISHA order_summary.pending IPO HIVI -->
-                <p class="mt-1 text-3xl font-semibold text-gray-900">{{ order_summary.pending }}</p>
+            <div class="card p-5 border-l-4 border-yellow-500">
+                <p class="text-sm font-medium text-gray-500">Bidhaa Zote</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">{{ products|length }}</p>
             </div>
-            <div class="card p-6 text-center border-t-4 border-green-500">
-                <p class="text-sm font-medium text-gray-500">Maagizo Yaliyokamilika</p>
-                 <!-- HAKIKISHA order_summary.delivered IPO HIVI -->
-                <p class="mt-1 text-3xl font-semibold text-gray-900">{{ order_summary.delivered }}</p>
+            <div class="card p-5 border-l-4 border-green-500">
+                <p class="text-sm font-medium text-gray-500">Matangazo</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">{{ posts|length }}</p>
             </div>
         </div>
 
         <!-- Usimamizi wa Bidhaa (Product Management) -->
         <section class="mb-10">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">Usimamizi wa Bidhaa ({{ products | length }})</h2>
-                <!-- LABDA UNAPASWA KUONGEZA LINKI ZA KUONGEZA BIDHAA HAPA -->
-                <a href="{{ url_for('add_product') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition duration-150">Ongeza Bidhaa Mpya</a>
+                <h2 class="text-xl font-bold text-gray-800">Usimamizi wa Bidhaa</h2>
+                <a href="{{ url_for('add_product') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Ongeza Bidhaa Mpya</a>
             </div>
             <div class="card p-4 overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jina la Bidhaa</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bei</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vitendo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jina</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bei</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategoria</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Hatua</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- HAKIKISHA products IPO HIVI -->
                         {% for product in products %}
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ product.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.price | format_currency }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ url_for('edit_product', product_id=product.id) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Hariri</a>
-                                <a href="{{ url_for('delete_product', product_id=product.id) }}" class="text-red-600 hover:text-red-900">Futa</a>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">{{ product.price | format_currency }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.category }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <!-- Hizi routes zinahitaji templates zake -->
+                                <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Hariri</a> 
+                                <a href="#" class="text-red-600 hover:text-red-900">Futa</a>
                             </td>
                         </tr>
                         {% endfor %}
-                        {% if not products %}
-                            <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Hakuna bidhaa zilizopatikana.</td></tr>
-                        {% endif %}
                     </tbody>
                 </table>
             </div>
         </section>
 
         <!-- Maagizo Mapya (Orders List) -->
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Maagizo Yote ({{ orders | length }})</h2>
-            <div class="card p-4 overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Agizo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bidhaa</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mteja</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hali</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarehe</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vitendo</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- HAKIKISHA orders IPO HIVI -->
-                        {% for order in orders %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.product_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.customer_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if order.status == 'Pending' %}bg-yellow-100 text-yellow-800
-                                    {% elif order.status == 'Delivered' %}bg-green-100 text-green-800
-                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                    {{ order.status }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.date }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <!-- LABDA LINKI YA KUUPDATE STATUS -->
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Sasisha</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        {% if not orders %}
-                            <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Hakuna maagizo yaliyopatikana.</td></tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Usimamizi wa Posts (Posts Management) -->
         <section>
-            <!-- Posts logic goes here, similar to products -->
+             <h2 class="text-xl font-bold text-gray-800 mb-4">Maagizo Yaliyopokelewa</h2>
+             <div class="card p-4 overflow-x-auto">
+                <!-- Tutatumia table rahisi kwa sasa -->
+                 <ul class="space-y-2">
+                     {% for order in orders %}
+                         <li class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                             <span>{{ order.customer_name }} - {{ order.product_name }}</span>
+                             <span class="text-sm font-bold text-yellow-600">{{ order.status }}</span>
+                         </li>
+                     {% endfor %}
+                 </ul>
+             </div>
         </section>
-
     </main>
 
+    <div class="text-center mt-8 pb-4">
+        <a href="{{ url_for('smart_arena_home') }}" class="text-blue-500 hover:text-blue-700">Rudi Nyumbani</a>
+    </div>
 </body>
 </html>
 
