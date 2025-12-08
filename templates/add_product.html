@@ -5,90 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ongeza Bidhaa Mpya</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
-        <!-- Header -->
-        <div class="bg-blue-600 p-6 text-center">
-            <h2 class="text-2xl font-bold text-white">Ongeza Bidhaa Mpya</h2>
-            <p class="text-blue-100 text-sm mt-1">Jaza taarifa za bidhaa hapa chini</p>
-        </div>
-
-        <!-- Form -->
-        <form action="{{ url_for('add_product') }}" method="POST" class="p-8 space-y-6">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg border-t-4 border-blue-600">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Ongeza Bidhaa Mpya</h2>
+        
+        <form method="POST" action="{{ url_for('add_product') }}" class="space-y-4">
             
-            <!-- Ujumbe wa Flash -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="p-3 rounded text-sm font-medium 
-                            {% if category == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
             <!-- Jina -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Jina la Bidhaa</label>
-                <input type="text" name="name" required placeholder="Mfano: Samsung Galaxy S24" 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                <label class="block text-gray-700 font-semibold mb-1">Jina la Bidhaa</label>
+                <input type="text" name="name" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <!-- Bei -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Bei (TZS)</label>
-                    <input type="number" name="price" required placeholder="0" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    <label class="block text-gray-700 font-semibold mb-1">Bei (TZS)</label>
+                    <input type="number" name="price" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <!-- Kategoria -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Kategoria</label>
-                    <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                        <option value="Electronics">Electronics</option>
-                        <option value="Simu">Simu</option>
+                    <label class="block text-gray-700 font-semibold mb-1">Kategoria</label>
+                    <select name="category" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="Simu Used">Simu Used</option>
+                        <option value="Simu Mpya">Simu Mpya</option>
                         <option value="Laptop">Laptop</option>
                         <option value="Accessories">Accessories</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Picha URL -->
+            <!-- Picha -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Link ya Picha (URL)</label>
-                <input type="url" name="image_url" placeholder="https://..." 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                <p class="text-xs text-gray-500 mt-1">Acha wazi kutumia picha ya msingi.</p>
+                <label class="block text-gray-700 font-semibold mb-1">Link ya Picha (URL)</label>
+                <input type="url" name="image_url" placeholder="https://..." class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
             <!-- Maelezo -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Maelezo</label>
-                <textarea name="description" rows="3" required placeholder="Fafanua bidhaa..." 
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"></textarea>
+                <label class="block text-gray-700 font-semibold mb-1">Maelezo</label>
+                <textarea name="description" rows="3" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
             </div>
 
-            <!-- Buttons -->
-            <div class="flex space-x-4 pt-2">
-                <a href="{{ url_for('admin_dashboard') }}" class="w-1/2 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300 transition text-center">
-                    Ghairi
-                </a>
-                <button type="submit" class="w-1/2 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">
-                    Hifadhi
-                </button>
+            <!-- Vifungo -->
+            <div class="flex justify-between pt-2">
+                <a href="{{ url_for('admin_dashboard') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">Ghairi</a>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 shadow transition">Hifadhi Bidhaa</button>
             </div>
+
         </form>
     </div>
 
 </body>
 </html>
 
+Hatua ya 3: Hakiki Link kwenye admin.html
+Mwisho, hakikisha kitufe chako kwenye templates/admin.html kinaelekeza kwenye add_product kwa usahihi.
+Tafuta mstari huu kwenye admin.html na uhakikishe uko hivi:
+<a href="{{ url_for('add_product') }}" class="...">Ongeza Bidhaa Mpya</a>
 
-      
+
