@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 import datetime
@@ -7,42 +8,45 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 app = Flask(__name__)
 # Neno la siri: admin / 12345
 app.secret_key = os.environ.get('SECRET_KEY', 'siri_yangu_ya_duka_123')
-
-# Majina ya faili za Data
 PRODUCTS_FILE = 'product.json'
 ORDERS_FILE = 'orders.json'
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "12345"
 
 # --- DATA FUNCTIONS ---
 def load_data(file_name):
-    """Hupakia data bila kuleta error. Inarudisha muundo sahihi."""
-    default_data = [] if file_name == ORDERS_FILE else {'products': [], 'posts': []}
-    
-    if not os.path.exists(file_name):
-        return default_data
+    """Hupakia data kwa usalama."""
+    default = [] if file_name == ORDERS_FILE else {'products': [], 'posts': []}
+    if not os.path.exists(file_name): return default
     try:
         with open(file_name, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # Hakikisha data ina muundo sahihi
-            if file_name == ORDERS_FILE and not isinstance(data, list): return []
-            if file_name == PRODUCTS_FILE and not isinstance(data, dict): return default_data
-            return data
+            content = f.read()
+            return json.loads(content) if content else default
     except:
-        return default_data
+        return default
 
 def save_data(data, file_name):
     """Huhifadhi data."""
     try:
         with open(file_name, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
+            json.dump(data, f, indent=4)
     except:
         pass
 
 def get_next_id(items):
-    # Logic salama ya kupata ID mpya
-    if not items: return 1
+    # Logic ya kupata ID mpya
     if isinstance(items, dict): items = items.get('products', [])
     if not items: return 1
     return max([i.get('id', 0) for i in items]) + 1
+
+# --- HELPER KWA TEMPLATES (Hapa ndipo tunatua tatizo lako) ---
+def smart_render(template_name_1, template_name_2, **kwargs):
+    """Inajaribu template ya kwanza, ikishindwa inajaribu ya pili."""
+    try:
+        return render_template(template_name_1, **kwargs)
+    except Exception:
+        # Jaribu jina la pili (backup)
+        return render_template(template_name_2, **kwargs)
 
 # --- FILTERS ---
 @app.template_filter('format_currency')
@@ -77,7 +81,7 @@ def product_details(product_id):
         
         new_order = {
             'id': get_next_id(orders),
-            'product_name': product.get('name', 'Unknown'),
+            'product_name': product.get('name', 'Bidhaa'),
             'price': product.get('price', 0),
             'customer_name': request.form.get('customer_name'),
             'phone': request.form.get('phone'),
@@ -86,16 +90,11 @@ def product_details(product_id):
         }
         orders.append(new_order)
         save_data(orders, ORDERS_FILE)
-        flash('Agizo limetumwa kikamilifu!', 'success')
+        flash('Agizo limetumwa!', 'success')
         return redirect(url_for('smart_arena_home'))
 
-    # MUHIMU: Hapa tunatumia jina 'product_detail.html' (bila 's') kama ilivyo kwenye GitHub yako
-    # Kama utabadilisha jina la faili, badilisha na hapa.
-    try:
-        return render_template('product_detail.html', product=product)
-    except:
-        # Fallback ikiwa jina lina 's'
-        return render_template('product_details.html', product=product)
+    # UJANJA: Inajaribu 'product_details.html' NA 'product_detail.html'
+    return smart_render('product_details.html', 'product_detail.html', product=product)
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
@@ -103,17 +102,14 @@ def admin_login():
         return redirect(url_for('admin_dashboard'))
         
     if request.method == 'POST':
-        if request.form.get('username') == 'admin' and request.form.get('password') == '12345':
+        if request.form.get('username') == ADMIN_USERNAME and request.form.get('password') == ADMIN_PASSWORD:
             session['logged_in'] = True
-            flash('Karibu Admin', 'success')
+            flash('Karibu Admin!', 'success')
             return redirect(url_for('admin_dashboard'))
-        flash('Umekosea jina au neno la siri!', 'error')
+        flash('Kosea jina au neno la siri!', 'error')
     
-    # MUHIMU: Tunajaribu majina yote mawili yanayowezekana ili kuepuka error
-    try:
-        return render_template('admin_login.html')
-    except:
-        return render_template('add_login.html')
+    # UJANJA: Inajaribu 'admin_login.html' NA 'add_login.html'
+    return smart_render('admin_login.html', 'add_login.html')
 
 @app.route('/admin')
 def admin_dashboard():
@@ -122,24 +118,27 @@ def admin_dashboard():
     
     data = load_data(PRODUCTS_FILE)
     orders = load_data(ORDERS_FILE)
-    
-    # Hakikisha tunapitisha vigezo vyote vinavyohitajika na admin.html
+    if not isinstance(orders, list): orders = []
+
+    order_summary = {
+        'total': len(orders),
+        'pending': len([o for o in orders if o.get('status') == 'Pending']),
+        'delivered': len([o for o in orders if o.get('status') == 'Delivered'])
+    }
+
     return render_template('admin.html', 
                          products=data.get('products', []), 
-                         orders=orders,
+                         orders=orders, 
                          posts=data.get('posts', []),
-                         order_summary={
-                             'total_orders': len(orders),
-                             'pending': sum(1 for o in orders if o.get('status') == 'Pending'),
-                             'delivered': sum(1 for o in orders if o.get('status') == 'Delivered')
-                         })
+                         order_summary=order_summary)
 
 @app.route('/admin/logout')
 def admin_logout():
     session.clear()
+    flash('Umetoka salama.', 'success')
     return redirect(url_for('smart_arena_home'))
 
-# Hii inahitajika kwa routes za kuongeza bidhaa (kama unazo kwenye template)
+# --- ROUTES ZA KUONGEZA/KUHARIRI ---
 @app.route('/admin/add_product', methods=['GET', 'POST'])
 def add_product():
     if not session.get('logged_in'): return redirect(url_for('admin_login'))
@@ -147,14 +146,13 @@ def add_product():
     if request.method == 'POST':
         data = load_data(PRODUCTS_FILE)
         products = data.get('products', [])
-        
         new_product = {
             'id': get_next_id(products),
             'name': request.form.get('name'),
             'price': float(request.form.get('price', 0)),
             'category': request.form.get('category'),
             'description': request.form.get('description'),
-            'image_url': request.form.get('image_url') or "https://placehold.co/400"
+            'image_url': request.form.get('image_url')
         }
         products.append(new_product)
         data['products'] = products
@@ -162,12 +160,17 @@ def add_product():
         flash('Bidhaa imeongezwa', 'success')
         return redirect(url_for('admin_dashboard'))
 
-    # Jaribu majina yote mawili ya template
-    try:
-        return render_template('add_product.html')
-    except:
-        return render_template('add_edit_product.html')
+    return smart_render('add_product.html', 'add_edit_product.html')
 
-# --- CONFIG KWA GUNICORN ---
+@app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
+def delete_product(product_id):
+    if not session.get('logged_in'): return redirect(url_for('admin_login'))
+    data = load_data(PRODUCTS_FILE)
+    data['products'] = [p for p in data.get('products', []) if p.get('id') != product_id]
+    save_data(data, PRODUCTS_FILE)
+    flash('Bidhaa imefutwa', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+# --- APP RUNNER ---
 if __name__ == '__main__':
     app.run(debug=True)
