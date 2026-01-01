@@ -3,209 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Arena | Duka Bora la Mtandaoni</title>
-    <!-- Load Tailwind CSS from CDN -->
+    <title>Smart Arena | Dijorama Investment</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome kwa icons (inahusisha icon ya Hamburger) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #1f2937;
-            scroll-behavior: smooth;
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .container {
-            max-width: 1280px;
-            margin: auto;
-            padding: 0 16px;
-        }
-        .header-bg {
-            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .product-card {
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-            background-color: white;
-        }
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-        }
-        .btn-primary {
-             background-color: #f97316; /* Orange */
-             color: white;
-        }
-        .btn-primary:hover {
-             background-color: #ea580c; /* Darker Orange */
-        }
-        .contact-section {
-            background-color: #1d4ed8; 
-            color: white;
+        .hero-pattern {
+            background-color: #3b82f6;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
     </style>
 </head>
-<body>
-    <!-- Navbar (Header) -->
-    <nav class="header-bg sticky top-0 z-50">
-        <div class="container flex justify-between items-center py-4">
-            <!-- Logo -->
-            <a href="{{ url_for('smart_arena_home') }}" class="text-3xl font-extrabold text-white tracking-wider">
-                SMART <span class="text-yellow-300">ARENA</span>
-            </a>
+<body class="bg-gray-50 text-gray-800 font-sans">
 
-            <!-- Desktop Menu -->
-            <div class="hidden md:flex space-x-6 items-center text-white font-medium">
-                <a href="#bidhaa" class="hover:text-yellow-300 transition duration-150">Bidhaa</a>
-                <a href="#matangazo" class="hover:text-yellow-300 transition duration-150">Matangazo</a>
-                <a href="#mawasiliano" class="hover:text-yellow-300 transition duration-150">Mawasiliano</a>
-                <a href="{{ url_for('admin_login') }}" class="bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg hover:bg-yellow-500 transition duration-150">
-                    <i class="fas fa-user-shield mr-1"></i> Admin
-                </a>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 glass shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-blue-600 flex items-center">
+                <i class="fas fa-mobile-alt mr-2"></i> Smart Arena
+            </a>
+            
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="#bidhaa" class="hover:text-blue-600 transition">Bidhaa</a>
+                <a href="#posts" class="hover:text-blue-600 transition">Matangazo</a>
+                <a href="#footer" class="hover:text-blue-600 transition">Mawasiliano</a>
+                
+                {% if is_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="bg-red-500 text-white px-4 py-2 rounded-full text-sm hover:bg-red-600 transition">
+                        <i class="fas fa-cog mr-1"></i> Admin Dashboard
+                    </a>
+                {% else %}
+                    <!-- Hii haionekani kwa watumiaji wa kawaida -->
+                {% endif %}
             </div>
 
-            <!-- Mobile Menu Button (Hamburger) - HUYU NDIO MENU YA DOT 3/MISTARI 3 -->
-            <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
-                <i class="fas fa-bars text-2xl"></i>
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-gray-600 focus:outline-none" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <i class="fas fa-bars text-xl"></i>
             </button>
         </div>
-
-        <!-- Mobile Menu (Dropdown) -->
-        <div id="mobile-menu" class="md:hidden hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 text-center bg-blue-700">
-                <a href="#bidhaa" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-600">Bidhaa</a>
-                <a href="#matangazo" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-600">Matangazo</a>
-                <a href="#mawasiliano" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-600">Mawasiliano</a>
-                <a href="{{ url_for('admin_login') }}" class="block px-3 py-2 rounded-md text-base font-medium bg-yellow-400 text-gray-900 hover:bg-yellow-500">
-                     <i class="fas fa-user-shield mr-1"></i> Admin Login
-                </a>
-            </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t px-4 py-2">
+            <a href="#bidhaa" class="block py-2 text-gray-700">Bidhaa</a>
+            <a href="#posts" class="block py-2 text-gray-700">Matangazo</a>
+            {% if is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="block py-2 text-red-500 font-bold">Admin Dashboard</a>
+            {% endif %}
         </div>
     </nav>
 
-    <div class="container">
-        <!-- Ujumbe wa Flash -->
+    <!-- Hero Section / Slideshow -->
+    <section class="hero-pattern text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Teknolojia Mpya. Bei Nafuu.</h1>
+            <p class="text-lg md:text-xl opacity-90 mb-8">Pata simu used na mpya, pamoja na accessories original kutoka Dijorama Investment.</p>
+            <a href="#bidhaa" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-gray-100 transition">Anza Kununua</a>
+        </div>
+    </section>
+
+    <!-- Messages -->
+    <div class="container mx-auto px-4 mt-6">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="mt-4 mb-6">
-                    {% for category, message in messages %}
-                        <div class="p-4 mb-2 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                            <i class="fas fa-info-circle mr-2"></i> {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
+                {% for category, message in messages %}
+                    <div class="p-4 mb-4 rounded-lg text-white {% if category == 'error' %}bg-red-500{% else %}bg-green-500{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             {% endif %}
         {% endwith %}
-
-        <!-- Posts/Matangazo Section -->
-        <section id="matangazo" class="my-12 p-6 bg-white rounded-xl shadow-2xl">
-            <h2 class="text-3xl font-extrabold text-center text-blue-600 mb-8 border-b pb-3">Matangazo & Ofa Mpya</h2>
-            {% if posts %}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {% for post in posts %}
-                        <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg transition duration-300 hover:shadow-md">
-                            <i class="fas fa-bullhorn text-yellow-500 text-3xl mb-3"></i>
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ post.title }}</h3>
-                            <p class="text-gray-600">{{ post.content | truncate(150, True, '...') }}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="p-6 text-center text-gray-500 bg-yellow-50 rounded-lg">Hakuna matangazo yanayopatikana kwa sasa.</p>
-            {% endif %}
-        </section>
-
-        <!-- Products Section -->
-        <section id="bidhaa" class="my-12">
-            <h2 class="text-3xl font-extrabold text-center text-gray-800 mb-10 border-b-4 border-orange-500 inline-block px-4 pb-2 mx-auto">Bidhaa Bora za Elektroniki</h2>
-            
-            {% if products %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {% for product in products %}
-                        <div class="product-card">
-                            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-t-xl" onerror="this.onerror=null;this.src='https://placehold.co/400x300/e5e7eb/4b5563?text=SMART+ARENA';">
-                            <div class="p-4">
-                                <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ product.name }}</h3>
-                                <p class="text-sm text-gray-500 mb-3 h-12 overflow-hidden">{{ product.description | truncate(60, True, '...') }}</p>
-                                <div class="flex flex-col mt-4">
-                                    <span class="text-2xl font-bold text-green-600 mb-3">{{ product.price | format_currency }}</span>
-                                    <a href="{{ url_for('product_details', product_id=product.id) }}" class="btn-primary text-center px-4 py-2 rounded-lg font-medium transition duration-150">
-                                        <i class="fas fa-cart-plus mr-1"></i> Agiza Sasa
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                 <div class="p-8 text-center bg-red-100 text-red-700 rounded-lg shadow-inner">
-                    <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
-                    <p class="text-lg">Hakuna bidhaa zilizopatikana kwenye mfumo. Tafadhali ongeza bidhaa kupitia Admin Dashboard.</p>
-                </div>
-            {% endif %}
-        </section>
-
     </div>
 
-    <!-- Footer / Mawasiliano Section -->
-    <footer id="mawasiliano" class="contact-section mt-16 py-10">
-        <div class="container grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
-            
-            <!-- Company Info -->
-            <div>
-                <h3 class="text-2xl font-extrabold mb-4 text-yellow-300">Smart Arena</h3>
-                <p class="mb-4">Duka lako namba moja la bidhaa za elektroniki Tanzania. Tunatoa ubora, huduma bora, na bei nafuu.</p>
-                <div class="flex space-x-4">
-                    <a href="#" class="text-white hover:text-yellow-300 transition duration-150"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="text-white hover:text-yellow-300 transition duration-150"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-white hover:text-yellow-300 transition duration-150"><i class="fab fa-instagram"></i></a>
+    <!-- Daily Posts / Matangazo -->
+    {% if posts %}
+    <section id="posts" class="container mx-auto px-4 py-12">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-yellow-500 pl-3">Habari & Matangazo</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            {% for post in posts %}
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-xl font-bold text-blue-600 mb-2">{{ post.title }}</h3>
+                <p class="text-gray-600">{{ post.content }}</p>
+                <p class="text-xs text-gray-400 mt-4">{{ post.date }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Bidhaa Section -->
+    <section id="bidhaa" class="container mx-auto px-4 py-12">
+        <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Bidhaa Zetu</h2>
+        
+        {% if products %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for product in products %}
+                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden group">
+                    <div class="relative">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md">{{ product.category }}</span>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg mb-2 truncate">{{ product.name }}</h3>
+                        <p class="text-2xl font-bold text-green-600 mb-4">{{ product.price | format_currency }}</p>
+                        <a href="{{ url_for('product_details', product_id=product.id) }}" class="block w-full text-center bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition">
+                            Ona Maelezo
+                        </a>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            
-            <!-- Mawasiliano -->
-            <div>
-                <h3 class="text-xl font-bold mb-4 border-b border-yellow-300 pb-2">Mawasiliano</h3>
-                <p class="mb-2"><i class="fas fa-map-marker-alt mr-2 text-yellow-300"></i> Kariakoo, Dar es Salaam</p>
-                <p class="mb-2"><i class="fas fa-phone mr-2 text-yellow-300"></i> +255 7XX XXX XXX</p>
-                <p class="mb-2"><i class="fas fa-envelope mr-2 text-yellow-300"></i> info@smartarena.co.tz</p>
+        {% else %}
+            <div class="text-center py-12 bg-white rounded-xl shadow-sm">
+                <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                <p class="text-gray-500">Hakuna bidhaa bado. Admin tafadhali ongeza bidhaa.</p>
             </div>
-            
-            <!-- Jumbe Muhimu (Quick Links) -->
+        {% endif %}
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer" class="bg-gray-900 text-white py-12 mt-12">
+        <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
             <div>
-                <h3 class="text-xl font-bold mb-4 border-b border-yellow-300 pb-2">Jumbe Muhimu</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-yellow-300 transition duration-150">Sera ya Faragha</a></li>
-                    <li><a href="#" class="hover:text-yellow-300 transition duration-150">Masharti na Vigezo</a></li>
-                    <li><a href="#" class="hover:text-yellow-300 transition duration-150">Maswali Yanayoulizwa Mara kwa Mara</a></li>
+                <h3 class="text-xl font-bold mb-4">Smart Arena</h3>
+                <p class="text-gray-400 text-sm">Tunakuletea bidhaa bora za kielektroniki kwa bei nafuu na uhakika.</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold mb-4">Mawasiliano</h3>
+                <ul class="text-gray-400 text-sm space-y-2">
+                    <li><i class="fas fa-phone mr-2"></i> +255 7XX XXX XXX</li>
+                    <li><i class="fas fa-envelope mr-2"></i> sales@smartarena.co.tz</li>
+                    <li><i class="fas fa-map-marker-alt mr-2"></i> Kariakoo, Dar es Salaam</li>
                 </ul>
             </div>
+            <div>
+                <h3 class="text-xl font-bold mb-4">Mitandao</h3>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-2xl hover:text-blue-400"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-2xl hover:text-pink-400"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-2xl hover:text-green-400"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
         </div>
-        
-        <!-- Copyright -->
-        <div class="container text-center text-xs mt-8 pt-4 border-t border-blue-600">
-            &copy; 2024 Smart Arena. Haki zote zimehifadhiwa.
+        <div class="text-center text-gray-600 text-sm mt-8 pt-8 border-t border-gray-800">
+            &copy; 2025 Smart Arena - Dijorama Investment.
         </div>
     </footer>
 
-    <!-- JavaScript kwa ajili ya Mobile Menu Toggle -->
-    <script>
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-        
-        // Ficha menu baada ya kubofya link kwenye simu
-        document.querySelectorAll('#mobile-menu a').forEach(item => {
-            item.addEventListener('click', () => {
-                document.getElementById('mobile-menu').classList.add('hidden');
-            });
-        });
-    </script>
 </body>
 </html>
 
-                        
+
+    
