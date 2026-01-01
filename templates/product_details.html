@@ -1,30 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="sw">
 <head>
-    <title>{{ product.name }}</title>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} | Smart Arena</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 font-sans">
-    <div class="container mx-auto p-4">
-        <a href="/" class="text-blue-500 mb-4 inline-block">&larr; Rudi Nyumbani</a>
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden md:flex">
-            <div class="md:w-1/2">
-                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-64 md:h-full object-cover">
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden md:flex">
+        <!-- Picha -->
+        <div class="md:w-1/2 bg-gray-100 flex items-center justify-center p-4">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="max-w-full h-auto rounded-lg shadow-sm"
+                 onerror="this.src='https://placehold.co/600x600?text=No+Image'">
+        </div>
+
+        <!-- Maelezo -->
+        <div class="md:w-1/2 p-8 md:p-12">
+            <a href="/" class="text-blue-500 text-sm hover:underline mb-4 block">&larr; Rudi Nyumbani</a>
+            
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wide bg-blue-50 px-3 py-1 rounded-full">{{ product.category }}</span>
+            <h1 class="text-3xl font-extrabold text-gray-900 mt-2 mb-2">{{ product.name }}</h1>
+            <p class="text-4xl font-bold text-green-600 mb-6">{{ product.price | format_currency }}</p>
+
+            <div class="prose text-gray-600 mb-8">
+                <p>{{ product.description }}</p>
+                {% if product.specs %}
+                <p class="mt-2 text-sm font-semibold">Sifa: {{ product.specs }}</p>
+                {% endif %}
             </div>
-            <div class="p-8 md:w-1/2">
-                <h1 class="text-3xl font-bold mb-2">{{ product.name }}</h1>
-                <p class="text-2xl text-green-600 font-bold mb-4">{{ product.price | format_currency }}</p>
-                <p class="text-gray-600 mb-6">{{ product.description }}</p>
-                
-                <form method="POST" class="border-t pt-4">
-                    <h3 class="text-xl font-semibold mb-4">Weka Agizo</h3>
-                    <input type="text" name="customer_name" placeholder="Jina Lako" class="w-full p-2 border rounded mb-2" required>
-                    <input type="text" name="phone" placeholder="Namba ya Simu" class="w-full p-2 border rounded mb-4" required>
-                    <button class="w-full bg-green-600 text-white p-3 rounded font-bold hover:bg-green-700">Tuma Agizo</button>
+
+            <!-- Fomu ya Agizo -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Weka Agizo Sasa</h3>
+                <form method="POST">
+                    <div class="space-y-4">
+                        <input type="text" name="customer_name" placeholder="Jina Lako Kamili" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="tel" name="phone" placeholder="Namba ya Simu" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <select name="payment_method" class="w-full p-3 border rounded-lg bg-white">
+                            <option value="Cash">Nitalipa Pesa Taslimu (Cash)</option>
+                            <option value="Mobile Money">Nitalipa kwa Simu</option>
+                        </select>
+                        <button class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow">
+                            Thibitisha Agizo
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
+
 </body>
 </html>
 
